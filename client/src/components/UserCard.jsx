@@ -33,4 +33,3 @@ export default UserCard;
 //   "last_name": "Minney",
 //   "email": "dminney0@seattletimes.com",
 //   "created_at": "2021-06-07T14:26:06Z"
-// }
