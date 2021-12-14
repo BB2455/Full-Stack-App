@@ -20,11 +20,11 @@ const UserInfo = ({ userData, editUser }) => {
         </ListGroup.Item>
         <ListGroup.Item>
           <div className="fw-bold">Created On</div>
-          {userData.created_at}
+          {userData.createdAt}
         </ListGroup.Item>
         <ListGroup.Item>
           <div className="fw-bold">User ID</div>
-          {userData.id}
+          {userData._id}
         </ListGroup.Item>
       </ListGroup>
       <Button className="m-3" variant="warning" onClick={editUser}>

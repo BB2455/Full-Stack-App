@@ -9,7 +9,7 @@ const SearchFilter = () => {
   return (
     <Form>
       <Form.Group className="mb-3" controlId="formSearchBar">
-        <Form.Control type="text" placeholder="Search..." />
+        <Form.Control autoComplete="off" type="text" placeholder="Search..." />
       </Form.Group>
 
       <Form.Group className="mb-3" controlId="formSearchFor">

@@ -8,7 +8,7 @@ import { Person } from "react-bootstrap-icons";
 const UserCard = ({ user }) => {
   return (
     <Link
-      to={`/user/${user.id}`}
+      to={`/user/${user._id}`}
       className="card"
       style={{ textDecoration: "none", color: "#212529" }}
     >
@@ -27,9 +27,3 @@ const UserCard = ({ user }) => {
 };
 
 export default UserCard;
-
-//   "id": "5ab853cc-ebec-4bf9-9e67-74e410e6fc33",
-//   "first_name": "Darb",
-//   "last_name": "Minney",
-//   "email": "dminney0@seattletimes.com",
-//   "created_at": "2021-06-07T14:26:06Z"

@@ -1,65 +1,84 @@
-import React from "react";
+import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import { useDispatch } from "react-redux";
+import { createUser, updateUser, deleteUser } from "../../actions/users";
+import { useNavigate } from "react-router-dom";
 
-const UserForm = ({ userData, cancelEdit }) => {
+const UserForm = ({ Data, cancelEdit }) => {
   let newForm = true;
-  if (userData) {
+  let defaultUserData = {
+    first_name: "",
+    last_name: "",
+    email: "",
+    created_at: "",
+    id: "",
+  };
+  if (Data) {
     newForm = false;
+    defaultUserData = Data;
   }
 
-  const [userFirstName, setUserFirstName] = React.useState(
-    newForm ? "" : userData.first_name
-  );
-  const [userLastName, setUserLastName] = React.useState(
-    newForm ? "" : userData.last_name
-  );
-  const [userEmail, setUserEmail] = React.useState(
-    newForm ? "" : userData.email
-  );
+  const [userData, setUserData] = useState(defaultUserData);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const firstNameChange = (e) => {
-    setUserFirstName(e.target.value);
+  const handleChange = (e) => {
+    setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
-  const lastNameChange = (e) => {
-    setUserLastName(e.target.value);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (newForm) {
+      dispatch(createUser(userData));
+      navigate("/", { replace: true });
+    } else {
+      dispatch(updateUser(userData._id, userData));
+      cancelEdit();
+    }
   };
 
-  const emailChange = (e) => {
-    setUserEmail(e.target.value);
+  const handleDelete = () => {
+    dispatch(deleteUser(userData._id));
+    navigate("/", { replace: true });
   };
 
   return (
-    <Form onSubmit={(e) => e.preventDefault()}>
+    <Form onSubmit={handleSubmit}>
       <Form.Group className="mb-3" controlId="formFirstName">
         <Form.Label>First Name</Form.Label>
         <Form.Control
+          autoComplete="off"
           required
           type="text"
           placeholder="First Name"
-          value={userFirstName}
-          onChange={firstNameChange}
+          name="first_name"
+          value={userData.first_name}
+          onChange={handleChange}
         />
       </Form.Group>
       <Form.Group className="mb-3" controlId="formLastName">
         <Form.Label>Last Name</Form.Label>
         <Form.Control
+          autoComplete="off"
           required
           type="text"
           placeholder="Last Name"
-          value={userLastName}
-          onChange={lastNameChange}
+          name="last_name"
+          value={userData.last_name}
+          onChange={handleChange}
         />
       </Form.Group>
       <Form.Group className="mb-3" controlId="formEmail">
         <Form.Label>Email</Form.Label>
         <Form.Control
+          autoComplete="off"
           required
           type="email"
           placeholder="Email"
-          value={userEmail}
-          onChange={emailChange}
+          name="email"
+          value={userData.email}
+          onChange={handleChange}
         />
       </Form.Group>
       {!newForm && (
@@ -69,12 +88,12 @@ const UserForm = ({ userData, cancelEdit }) => {
             <Form.Control
               plaintext
               readOnly
-              defaultValue={userData.created_at}
+              defaultValue={userData.createdAt}
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formID">
             <Form.Label>User ID</Form.Label>
-            <Form.Control plaintext readOnly defaultValue={userData.id} />
+            <Form.Control plaintext readOnly defaultValue={userData._id} />
           </Form.Group>
         </>
       )}
@@ -90,7 +109,9 @@ const UserForm = ({ userData, cancelEdit }) => {
           >
             Cancel
           </Button>
-          <Button variant="outline-danger">Delete</Button>
+          <Button variant="outline-danger" onClick={handleDelete}>
+            Delete
+          </Button>
         </>
       )}
     </Form>
