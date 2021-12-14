@@ -17,7 +17,7 @@ ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <NavBar />
-      <Container className="mt-5">
+      <Container className="mt-5 mb-5">
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="login" element={<Login />} />

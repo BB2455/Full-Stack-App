@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import React from "react";
 import UserForm from "../components/User/UserForm";
-import UserLayout from "../components/User/UserLayout";
+import UserInfo from "../components/User/UserInfo";
 
 const User = () => {
   const [editUser, setEditUser] = React.useState(false);
@@ -25,7 +25,7 @@ const User = () => {
           }}
         />
       ) : (
-        <UserLayout
+        <UserInfo
           userData={userData}
           editUser={() => {
             setEditUser(true);
