@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/user.js";
 
 export const getUsers = async (req, res) => {
@@ -10,8 +11,6 @@ export const getUsers = async (req, res) => {
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
-
-  res.send("THIS WORKS");
 };
 
 export const createUser = async (req, res) => {
@@ -25,4 +24,26 @@ export const createUser = async (req, res) => {
   } catch (error) {
     res.status(409).json({ message: error.message });
   }
+};
+
+export const updateUser = async (req, res) => {
+  const { id: _id } = req.params;
+  const userData = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(_id))
+    return res.status(404).send("No user with that id");
+
+  const updatedUser = await User.findByIdAndUpdate(_id, userData, {
+    new: true,
+  });
+  res.json(updatedUser);
+};
+
+export const deleteUser = async (req, res) => {
+  const { id: _id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(_id))
+    return res.status(404).send("No user with that id");
+
+  await User.findByIdAndDelete(_id);
+  res.json({ message: "User Deleted Successfully" });
 };
