@@ -5,12 +5,13 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/users.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
 router.get("/", getUsers);
-router.post("/", createUser);
-router.patch("/:id", updateUser);
-router.delete("/:id", deleteUser);
+router.post("/", auth, createUser);
+router.patch("/:id", auth, updateUser);
+router.delete("/:id", auth, deleteUser);
 
 export default router;

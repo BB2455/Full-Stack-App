@@ -5,8 +5,6 @@ export const getUsers = async (req, res) => {
   try {
     const Users = await User.find();
 
-    console.log(Users);
-
     res.status(200).json(Users);
   } catch (error) {
     res.status(404).json({ message: error.message });
