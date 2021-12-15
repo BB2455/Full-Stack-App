@@ -1,8 +1,15 @@
+import React, { useEffect } from "react";
 import LoginForm from "../components/Login/LoginForm";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const profile = localStorage.getItem("profile");
+  useEffect(() => {
+    if (profile) navigate("/", { replace: true });
+  }, [navigate, profile]);
   return (
     <div>
       <Row className="justify-content-center">

@@ -10,6 +10,7 @@ const Home = () => {
   const users = useSelector((state) => state.users);
   const loaded = useSelector((state) => state.loaded);
   const [isLoaded, setIsLoaded] = useState(false);
+  const profile = localStorage.getItem("profile");
   useEffect(() => {
     setIsLoaded(loaded);
   }, [loaded]);
@@ -33,9 +34,11 @@ const Home = () => {
       ) : (
         <>
           <h2>No Users Found</h2>
-          <Link to="/create" className="btn btn-primary">
-            Create New User
-          </Link>
+          {profile && (
+            <Link to="/create" className="btn btn-primary">
+              Create New User
+            </Link>
+          )}
         </>
       )}
     </>

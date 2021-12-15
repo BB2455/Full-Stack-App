@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import ListGroup from "react-bootstrap/ListGroup";
 
 const UserInfo = ({ userData, editUser }) => {
+  const profile = localStorage.getItem("profile");
   return (
     <div>
       <ListGroup variant="flush">
@@ -27,9 +28,11 @@ const UserInfo = ({ userData, editUser }) => {
           {userData._id}
         </ListGroup.Item>
       </ListGroup>
-      <Button className="m-3" variant="warning" onClick={editUser}>
-        Edit
-      </Button>
+      {profile && (
+        <Button className="m-3" variant="warning" onClick={editUser}>
+          Edit
+        </Button>
+      )}
     </div>
   );
 };
