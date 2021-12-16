@@ -9,16 +9,15 @@ const SECRET = process.env.SECRET;
 
 export const login = async (req, res) => {
   const { username, password } = req.body;
-
+  const lowerUsername = username.toLowerCase();
   try {
-    const existingAdmin = await AdminModal.findOne({ username });
+    const existingAdmin = await AdminModal.findOne({ lowerUsername });
     if (!existingAdmin)
       return res.status(404).json({ message: "Admin doesn't exist" });
-    // const isPasswordCorrect = await bcrypt.compare(
-    //   password,
-    //   existingAdmin.password
-    // );
-    const isPasswordCorrect = password === existingAdmin.password;
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      existingAdmin.password
+    );
     if (!isPasswordCorrect)
       return res.status(400).json({ message: "Invalid credentials" });
     const token = jwt.sign(
