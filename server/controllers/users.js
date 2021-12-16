@@ -34,7 +34,7 @@ export const updateUser = async (req, res) => {
   const updatedUser = await User.findByIdAndUpdate(_id, userData, {
     new: true,
   });
-  res.json(updatedUser);
+  res.status(200).json(updatedUser);
 };
 
 export const deleteUser = async (req, res) => {
@@ -43,5 +43,5 @@ export const deleteUser = async (req, res) => {
     return res.status(404).send("No user with that id");
 
   await User.findByIdAndDelete(_id);
-  res.json({ message: "User Deleted Successfully" });
+  res.status(200).json({ message: "User Deleted Successfully" });
 };

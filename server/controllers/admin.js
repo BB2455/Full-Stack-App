@@ -11,7 +11,9 @@ export const login = async (req, res) => {
   const { username, password } = req.body;
   const lowerUsername = username.toLowerCase();
   try {
-    const existingAdmin = await AdminModal.findOne({ lowerUsername });
+    const existingAdmin = await AdminModal.findOne({
+      username: lowerUsername,
+    });
     if (!existingAdmin)
       return res.status(404).json({ message: "Admin doesn't exist" });
     const isPasswordCorrect = await bcrypt.compare(
