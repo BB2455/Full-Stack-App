@@ -25,7 +25,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { username: existingAdmin.username, id: existingAdmin._id },
       SECRET,
-      { expiresIn: "5m" }
+      { expiresIn: "1h" }
     );
     res.status(200).json({ token });
   } catch (error) {

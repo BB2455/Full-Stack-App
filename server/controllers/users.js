@@ -2,18 +2,35 @@ import mongoose from "mongoose";
 import User from "../models/user.js";
 
 export const getUsers = async (req, res) => {
+  const { page } = req.params;
   try {
-    const Users = await User.find();
+    const LIMIT = 4;
+    const startIndex = (Number(page) - 1) * LIMIT;
+    const total = await User.countDocuments();
+    const users = await User.find()
+      .sort({ _id: -1 })
+      .limit(LIMIT)
+      .skip(startIndex);
 
-    res.status(200).json(Users);
+    res.status(200).json({
+      data: users,
+      currentPage: Number(page),
+      numberOfPages: Math.ceil(total / LIMIT),
+    });
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
+export const getUser = async (req, res) => {
+  const { id: _id } = req.params;
+  const user = await User.findById(_id);
+  if (!user) return res.status(404).json({ message: "No user with that id" });
+  res.status(200).json(user);
+};
+
 export const createUser = async (req, res) => {
   const user = req.body;
-
   const newUser = new User(user);
 
   try {
