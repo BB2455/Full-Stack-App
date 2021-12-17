@@ -1,30 +1,44 @@
 import { useParams } from "react-router-dom";
-import React from "react";
+import React, { useEffect } from "react";
 import UserForm from "../components/User/UserForm";
 import UserInfo from "../components/User/UserInfo";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { getUser } from "../actions/users";
+import Spinner from "react-bootstrap/Spinner";
 
 const User = () => {
   const [editUser, setEditUser] = React.useState(false);
-  const users = useSelector((state) => state.users);
+  const { user, isLoading } = useSelector((state) => state.users);
+  const dispatch = useDispatch();
 
-  let userId = useParams();
-  const currentUser = users.find((user) => user._id === userId.id);
+  let { id } = useParams();
+
+  useEffect(() => {
+    dispatch(getUser(id));
+    //eslint-disable-next-line
+  }, [id]);
+
   return (
     <div>
-      {currentUser ? (
+      {isLoading ? (
+        <div className="d-flex justify-content-center">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+      ) : user ? (
         <>
-          <h1 className="mb-5">User: {userId.id}</h1>
+          <h1 className="mb-5">User: {id}</h1>
           {editUser ? (
             <UserForm
-              Data={currentUser}
+              Data={user}
               cancelEdit={() => {
                 setEditUser(false);
               }}
             />
           ) : (
             <UserInfo
-              userData={currentUser}
+              userData={user}
               editUser={() => {
                 setEditUser(true);
               }}

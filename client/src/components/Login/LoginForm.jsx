@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
@@ -11,10 +11,30 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const defaultForm = { username: "", password: "" };
   const [formData, setForm] = useState(defaultForm);
+  const [error, setError] = useState("");
+
+  const errorHandler = (errorMessage) => {
+    const errorCode = errorMessage.match(/\d+/);
+    switch (errorCode[0]) {
+      case "404":
+        setError("Admin not found, please try again.");
+        return;
+      case "400":
+        setError(
+          "Your login credentials could not be verified, please try again."
+        );
+        return;
+      default:
+        setError("Something went wrong, please try again later.");
+        return;
+    }
+  };
+
+  useEffect(() => {}, [error]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login(formData, navigate));
+    dispatch(login(formData, navigate, errorHandler));
   };
 
   const handleChange = (e) => {
@@ -43,6 +63,11 @@ const LoginForm = () => {
             onChange={handleChange}
           />
         </FloatingLabel>
+        {error && (
+          <Form.Text id="loginError" className="text-danger">
+            {error}
+          </Form.Text>
+        )}
       </Form.Group>
       <div className="d-grid">
         <Button variant="outline-primary" type="submit">

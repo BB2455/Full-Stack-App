@@ -1,19 +1,53 @@
-import { FETCH_ALL, CREATE, UPDATE, DELETE } from "../constants/actionTypes";
+import {
+  FETCH_ALL,
+  FETCH,
+  CREATE,
+  UPDATE,
+  DELETE,
+  START_LOADING,
+  END_LOADING,
+} from "../constants/actionTypes";
 
-const reducer = (users = [], action) => {
+const initialUsers = {
+  users: [],
+  currentPage: null,
+  numberOfPages: null,
+  user: null,
+  isLoading: true,
+};
+
+const reducer = (state = initialUsers, action) => {
   switch (action.type) {
     case FETCH_ALL:
-      return action.payload;
+      console.log(action);
+      return {
+        ...state,
+        users: action.payload.data,
+        currentPage: action.payload.currentPage,
+        numberOfPages: action.payload.numberOfPages,
+      };
+    case FETCH:
+      return { ...state, user: action.payload };
     case CREATE:
-      return [...users, action.payload];
+      return { ...state, users: [...state.users, action.payload] };
     case UPDATE:
-      return users.map((user) =>
-        user._id === action.payload._id ? action.payload : user
-      );
+      return {
+        ...state,
+        users: state.users.map((user) =>
+          user._id === action.payload._id ? action.payload : user
+        ),
+      };
     case DELETE:
-      return users.filter((user) => user._id !== action.payload);
+      return {
+        ...state,
+        users: state.users.filter((user) => user._id !== action.payload),
+      };
+    case START_LOADING:
+      return { ...state, isLoading: true };
+    case END_LOADING:
+      return { ...state, isLoading: false };
     default:
-      return users;
+      return state;
   }
 };
 

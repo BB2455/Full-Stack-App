@@ -20,6 +20,7 @@ const UserForm = ({ Data, cancelEdit }) => {
   }
 
   const [userData, setUserData] = useState(defaultUserData);
+  const [res, setRes] = useState({ message: "", error: false });
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -27,11 +28,15 @@ const UserForm = ({ Data, cancelEdit }) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
+  const message = (res) => {
+    console.log(res);
+    setRes(res);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newForm) {
-      dispatch(createUser(userData));
-      navigate("/", { replace: true });
+      dispatch(createUser(userData, message));
     } else {
       dispatch(updateUser(userData._id, userData));
       cancelEdit();
@@ -80,6 +85,11 @@ const UserForm = ({ Data, cancelEdit }) => {
           value={userData.email}
           onChange={handleChange}
         />
+        {res.message.length > 0 && (
+          <Form.Text className={res.error ? "text-danger" : "text-success"}>
+            {res.message}
+          </Form.Text>
+        )}
       </Form.Group>
       {!newForm && (
         <>

@@ -1,20 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import { NavBar } from "./components";
-import { useDispatch } from "react-redux";
-import { getUsers } from "./actions/users";
-import { loaded } from "./actions/loaded";
 
 import { Home, Login, Search, User, NotFoundPage, CreateUser } from "./routes";
 
 const App = () => {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getUsers()).then(dispatch(loaded()));
-  }, [dispatch]);
-
   return (
     <BrowserRouter>
       <NavBar />

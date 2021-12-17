@@ -6,7 +6,6 @@ const reducer = (state = { authData: null }, action) => {
       localStorage.setItem("profile", JSON.stringify({ ...action?.data }));
       return { ...state, authData: action?.data };
     case LOGOUT:
-      console.log("Logged out");
       localStorage.removeItem("profile");
       return { ...state, authData: null };
     default:

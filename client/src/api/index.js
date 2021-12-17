@@ -11,10 +11,11 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-export const fetchUsers = () => API.get("/users");
+export const fetchUsers = (page) => API.get(`/users/${page}`);
+export const fetchUser = (userId) => API.get(`/users/id/${userId}`);
 export const createUser = (newUser) => API.post("/users", newUser);
-export const updateUser = (userID, updatedUser) =>
-  API.patch(`/users/${userID}`, updatedUser);
-export const deleteUser = (userID) => API.delete(`/users/${userID}`);
+export const updateUser = (userId, updatedUser) =>
+  API.patch(`/users/${userId}`, updatedUser);
+export const deleteUser = (userId) => API.delete(`/users/id/${userId}`);
 
 export const login = (formData) => API.post(`/admin/login`, formData);
