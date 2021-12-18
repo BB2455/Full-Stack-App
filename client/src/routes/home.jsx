@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
 import { getUsers } from "../actions/users";
-import UsersPagination from "../components/UsersPagination";
+import Pagination from "../components/Pagination";
 
 const Home = () => {
   const { users, isLoading, currentPage, numberOfPages } = useSelector(
@@ -40,9 +40,10 @@ const Home = () => {
               </Col>
             ))}
           </Row>
-          <UsersPagination
+          <Pagination
             currentPage={currentPage}
             numberOfPages={numberOfPages}
+            urlLink="/?page="
           />
         </>
       ) : (
