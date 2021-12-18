@@ -4,7 +4,7 @@ import User from "../models/user.js";
 export const getUsers = async (req, res) => {
   const { page } = req.params;
   try {
-    const LIMIT = 4;
+    const LIMIT = 12;
     const startIndex = (Number(page) - 1) * LIMIT;
     const total = await User.countDocuments();
     const users = await User.find()
