@@ -52,11 +52,15 @@ export const createUser = (newUser, handleRes) => async (dispatch) => {
   }
 };
 
-export const updateUser = (userId, userData) => async (dispatch) => {
+export const updateUser = (userId, userData, handleRes) => async (dispatch) => {
   try {
     const { data } = await api.updateUser(userId, userData);
     dispatch({ type: UPDATE, payload: data });
   } catch (error) {
+    handleRes({
+      message: "Something went wrong, please try again later.",
+      error: true,
+    });
     console.log(error.message);
   }
 };

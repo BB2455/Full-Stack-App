@@ -19,7 +19,6 @@ const initialUsers = {
 const reducer = (state = initialUsers, action) => {
   switch (action.type) {
     case FETCH_ALL:
-      console.log(action);
       return {
         ...state,
         users: action.payload.data,
@@ -36,6 +35,7 @@ const reducer = (state = initialUsers, action) => {
         users: state.users.map((user) =>
           user._id === action.payload._id ? action.payload : user
         ),
+        user: action.payload,
       };
     case DELETE:
       return {

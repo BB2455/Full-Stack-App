@@ -28,18 +28,18 @@ const UserForm = ({ Data, cancelEdit }) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
-  const message = (res) => {
-    console.log(res);
+  const handleRes = (res) => {
     setRes(res);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newForm) {
-      dispatch(createUser(userData, message));
+      dispatch(createUser(userData, handleRes));
     } else {
-      dispatch(updateUser(userData._id, userData));
-      cancelEdit();
+      dispatch(updateUser(userData._id, userData, handleRes)).then(() => {
+        if (!res.error) return cancelEdit();
+      });
     }
   };
 
@@ -85,7 +85,7 @@ const UserForm = ({ Data, cancelEdit }) => {
           value={userData.email}
           onChange={handleChange}
         />
-        {res.message.length > 0 && (
+        {res.message.length > 0 && newForm && (
           <Form.Text className={res.error ? "text-danger" : "text-success"}>
             {res.message}
           </Form.Text>
@@ -104,6 +104,11 @@ const UserForm = ({ Data, cancelEdit }) => {
           <Form.Group className="mb-3" controlId="formID">
             <Form.Label>User ID</Form.Label>
             <Form.Control plaintext readOnly defaultValue={userData._id} />
+            {res.message.length > 0 && !newForm && (
+              <Form.Text className={res.error ? "text-danger" : "text-success"}>
+                {res.message}
+              </Form.Text>
+            )}
           </Form.Group>
         </>
       )}
@@ -129,9 +134,3 @@ const UserForm = ({ Data, cancelEdit }) => {
 };
 
 export default UserForm;
-
-//   "id": "5ab853cc-ebec-4bf9-9e67-74e410e6fc33",
-//   "first_name": "Darb",
-//   "last_name": "Minney",
-//   "email": "dminney0@seattletimes.com",
-//   "created_at": "2021-06-07T14:26:06Z"

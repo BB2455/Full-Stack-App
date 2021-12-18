@@ -3,7 +3,7 @@ import UserCard from "../components/User/UserCard";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
 import { getUsers } from "../actions/users";
 import UsersPagination from "../components/UsersPagination";
@@ -13,14 +13,14 @@ const Home = () => {
     (state) => state.users
   );
   const dispatch = useDispatch();
+  const location = useLocation();
   const profile = localStorage.getItem("profile");
   let [searchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page")) || 1;
   useEffect(() => {
-    console.log(page);
     dispatch(getUsers(page));
     //eslint-disable-next-line
-  }, []);
+  }, [location]);
 
   return (
     <>
