@@ -87,6 +87,13 @@ const pagination = ({ currentPage, numberOfPages, urlLink }) => {
       <Pagination className="mt-5 justify-content-center">
         {createPagination()}
       </Pagination>
+      {numberOfPages > 1 && (
+        <div className="d-flex justify-content-center">
+          <h6 className="text-muted">
+            Page {currentPage} of {numberOfPages}
+          </h6>
+        </div>
+      )}
     </>
   );
 };
