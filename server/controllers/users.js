@@ -16,6 +16,7 @@ export const getUsers = async (req, res) => {
       data: users,
       currentPage: Number(page),
       numberOfPages: Math.ceil(total / LIMIT),
+      results: total,
     });
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -41,24 +42,61 @@ export const getUser = async (req, res) => {
 //   orderType: "relevancy",
 //   order: "ascending",
 export const getUsersBySearch = async (req, res) => {
-  console.log("Called: ", req.query);
   const { search, filterBy, startDate, endDate, orderType, order, page } =
     req.query;
-  let searchRegEx;
-  search ? (searchRegEx = new RegExp(search, "i")) : (searchRegEx = /[\d\D]+/i);
-  const users = await User.find(
+  const searchRegEx = search ? new RegExp(search, "i") : /[\d\D]+/i;
+  const searchName =
     filterBy === "firstName"
       ? { first_name: searchRegEx }
       : filterBy === "lastName"
       ? { last_name: searchRegEx }
-      : { $or: [{ first_name: searchRegEx }, { last_name: searchRegEx }] }
-  );
+      : { $or: [{ first_name: searchRegEx }, { last_name: searchRegEx }] };
+  const searchStartDate = startDate && {
+    createdAt: { $gte: new Date(startDate) },
+  };
+  const searchEndDate = endDate && { createdAt: { $lte: new Date(endDate) } };
+  let getOrder;
+  switch (orderType) {
+    case "relevancy":
+      getOrder =
+        filterBy === "lastName"
+          ? { last_name: order === "ascending" ? 1 : -1 }
+          : { first_name: order === "ascending" ? 1 : -1 };
+      break;
+    case "first_name":
+      getOrder = { first_name: order === "ascending" ? 1 : -1 };
+      break;
+    case "last_name":
+      getOrder = { last_name: order === "ascending" ? 1 : -1 };
+      break;
+    case "created_at":
+      getOrder = { createdAt: order === "ascending" ? 1 : -1 };
+      break;
+    case "updated_at":
+      getOrder = { updatedAt: order === "ascending" ? 1 : -1 };
+      break;
+    default:
+      getOrder = { first_name: order === "ascending" ? 1 : -1 };
+      break;
+  }
+
+  const users = await User.find(
+    searchStartDate && searchEndDate
+      ? { $and: [searchName, searchStartDate, searchEndDate] }
+      : searchStartDate
+      ? { $and: [searchName, searchStartDate] }
+      : searchEndDate
+      ? { $and: [searchName, searchEndDate] }
+      : searchName
+  ).sort(getOrder);
   if (!users) return res.status(404).json({ message: "No Users Found" });
+  const total = users.length;
   const getPage = page || 1;
   res.json({
     data: users,
     currentPage: getPage,
     numberOfPages: 2,
+    results: total,
   });
   try {
   } catch (error) {
