@@ -20,7 +20,9 @@ const SearchFilter = () => {
     order: "ascending",
   };
 
-  const { users, isLoading, error } = useSelector((state) => state.users);
+  const { users, results, isLoading, error } = useSelector(
+    (state) => state.users
+  );
   const [searchQuery, setSearchQuery] = useState(defaultSearchQuery);
   const [searchQueried, setSearchQueried] = useState(false);
   const dispatch = useDispatch();
@@ -57,7 +59,6 @@ const SearchFilter = () => {
 
   useEffect(() => {
     if (location.search) {
-      console.log("NEW SEARCH: ", location.search);
       setSearchQueried(true);
       dispatch(getPostsBySearch({ url: location.search }));
       return;
@@ -156,15 +157,17 @@ const SearchFilter = () => {
           </Button>
         </div>
       </Form>
-      {console.log("Users: ", users)}
       {!searchQueried ? null : isLoading ? (
         <div className="d-flex justify-content-center">
           <Spinner animation="border" role="status">
             <span className="visually-hidden">Loading...</span>
           </Spinner>
         </div>
-      ) : users || users.length > 0 ? (
-        <UsersContainer />
+      ) : users.length > 0 ? (
+        <>
+          <h3 className="mb-3">Results: {results}</h3>
+          <UsersContainer />
+        </>
       ) : error ? (
         <h2>{error}</h2>
       ) : (

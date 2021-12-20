@@ -14,6 +14,7 @@ const initialUsers = {
   users: [],
   currentPage: null,
   numberOfPages: null,
+  results: null,
   user: null,
   isLoading: true,
   error: null,
@@ -37,6 +38,7 @@ const reducer = (state = initialUsers, action) => {
         users: action.payload.data,
         currentPage: action.payload.currentPage,
         numberOfPages: action.payload.numberOfPages,
+        results: action.payload.results,
         error: null,
       };
     case CREATE:
@@ -61,7 +63,7 @@ const reducer = (state = initialUsers, action) => {
     case END_LOADING:
       return { ...state, isLoading: false };
     case ERROR:
-      return { ...state, error: action.payload };
+      return { ...state, users: [], user: null, error: action.payload };
     default:
       return state;
   }

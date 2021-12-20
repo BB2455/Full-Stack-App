@@ -25,14 +25,14 @@ const pagination = ({ currentPage, numberOfPages, urlLink }) => {
 
     if (currentPage > 3) {
       items.push(
-        <PageItem key={1} num={1} urlLink={urlLink} special={"First"} />
+        <PageItem key={"first"} num={1} urlLink={urlLink} special={"First"} />
       );
     }
 
     if (currentPage > 1) {
       items.push(
         <PageItem
-          key={currentPage - 1}
+          key={"previous"}
           num={currentPage - 1}
           urlLink={urlLink}
           special={"Previous"}
@@ -60,7 +60,7 @@ const pagination = ({ currentPage, numberOfPages, urlLink }) => {
     if (currentPage < numberOfPages) {
       items.push(
         <PageItem
-          key={currentPage + 1}
+          key={"next"}
           num={currentPage + 1}
           urlLink={urlLink}
           special={"Next"}
@@ -70,14 +70,12 @@ const pagination = ({ currentPage, numberOfPages, urlLink }) => {
 
     if (currentPage + 2 < numberOfPages) {
       items.push(
-        <>
-          <PageItem
-            key={numberOfPages}
-            num={numberOfPages}
-            urlLink={urlLink}
-            special={"Last"}
-          />
-        </>
+        <PageItem
+          key={"last"}
+          num={numberOfPages}
+          urlLink={urlLink}
+          special={"Last"}
+        />
       );
     }
 

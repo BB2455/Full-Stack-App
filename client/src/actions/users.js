@@ -16,12 +16,12 @@ export const getUsers = (page) => async (dispatch) => {
     dispatch({ type: START_LOADING });
 
     const {
-      data: { data, currentPage, numberOfPages },
+      data: { data, currentPage, numberOfPages, results },
     } = await api.fetchUsers(page);
 
     dispatch({
       type: FETCH_ALL,
-      payload: { data, currentPage, numberOfPages },
+      payload: { data, currentPage, numberOfPages, results },
     });
     dispatch({ type: END_LOADING });
   } catch (error) {
@@ -52,12 +52,12 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
     dispatch({ type: START_LOADING });
 
     const {
-      data: { data, currentPage, numberOfPages },
+      data: { data, currentPage, numberOfPages, results },
     } = await api.fetchPostsBySearch(searchQuery);
 
     dispatch({
       type: FETCH_BY_SEARCH,
-      payload: { data, currentPage, numberOfPages },
+      payload: { data, currentPage, numberOfPages, results },
     });
     dispatch({ type: END_LOADING });
   } catch (error) {
@@ -66,7 +66,7 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
       type: ERROR,
       payload: "Unable to get users, please try again later.",
     });
-    console.log(error);
+    console.log(error.message);
   }
 };
 
