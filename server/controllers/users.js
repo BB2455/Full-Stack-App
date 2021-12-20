@@ -35,15 +35,12 @@ export const getUser = async (req, res) => {
   }
 };
 
-//   search: "",
-//   filterBy: "firstAndLast",
-//   startDate: "",
-//   endDate: "",
-//   orderType: "relevancy",
-//   order: "ascending",
 export const getUsersBySearch = async (req, res) => {
   const { search, filterBy, startDate, endDate, orderType, order, page } =
     req.query;
+  const LIMIT = 12;
+  const getPage = page || 1;
+  const startIndex = (Number(getPage) - 1) * LIMIT;
   const searchRegEx = search ? new RegExp(search, "i") : /[\d\D]+/i;
   const searchName =
     filterBy === "firstName"
@@ -89,13 +86,14 @@ export const getUsersBySearch = async (req, res) => {
       ? { $and: [searchName, searchEndDate] }
       : searchName
   ).sort(getOrder);
-  if (!users) return res.status(404).json({ message: "No Users Found" });
   const total = users.length;
-  const getPage = page || 1;
-  res.json({
-    data: users,
-    currentPage: getPage,
-    numberOfPages: 2,
+
+  if (!users) return res.status(404).json({ message: "No Users Found" });
+
+  res.status(200).json({
+    data: users.slice(startIndex, startIndex + LIMIT),
+    currentPage: Number(getPage),
+    numberOfPages: Math.ceil(total / LIMIT),
     results: total,
   });
   try {
