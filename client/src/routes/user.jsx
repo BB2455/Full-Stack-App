@@ -46,9 +46,7 @@ const User = () => {
           )}
         </>
       ) : (
-        <>
-          <h1>No User Found</h1>
-        </>
+        <h1>No User Found</h1>
       )}
     </div>
   );

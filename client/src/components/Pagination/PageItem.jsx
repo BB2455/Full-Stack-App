@@ -23,7 +23,7 @@ const PageItem = ({ num, active, urlLink, special }) => {
   return (
     <li className={`${active ? "page-item active" : "page-item"}`}>
       {active ? (
-        <li className="page-link">{num}</li>
+        <p className="page-link">{num}</p>
       ) : (
         <Link className="page-link" to={`${urlLink}${num}`}>
           {!specialChar ? (

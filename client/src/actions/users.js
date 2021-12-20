@@ -1,11 +1,13 @@
 import {
   FETCH_ALL,
   FETCH,
+  FETCH_BY_SEARCH,
   CREATE,
   UPDATE,
   DELETE,
   START_LOADING,
   END_LOADING,
+  ERROR,
 } from "../constants/actionTypes";
 import * as api from "../api";
 
@@ -23,6 +25,11 @@ export const getUsers = (page) => async (dispatch) => {
     });
     dispatch({ type: END_LOADING });
   } catch (error) {
+    dispatch({ type: END_LOADING });
+    dispatch({
+      type: ERROR,
+      payload: "Unable to get users, please try again later.",
+    });
     console.log(error.message);
   }
 };
@@ -34,7 +41,32 @@ export const getUser = (id) => async (dispatch) => {
     dispatch({ type: FETCH, payload: data });
     dispatch({ type: END_LOADING });
   } catch (error) {
+    dispatch({ type: END_LOADING });
+    dispatch({ type: ERROR, payload: "Something went wrong" });
     console.log(error.message);
+  }
+};
+
+export const getPostsBySearch = (searchQuery) => async (dispatch) => {
+  try {
+    dispatch({ type: START_LOADING });
+
+    const {
+      data: { data, currentPage, numberOfPages },
+    } = await api.fetchPostsBySearch(searchQuery);
+
+    dispatch({
+      type: FETCH_BY_SEARCH,
+      payload: { data, currentPage, numberOfPages },
+    });
+    dispatch({ type: END_LOADING });
+  } catch (error) {
+    dispatch({ type: END_LOADING });
+    dispatch({
+      type: ERROR,
+      payload: "Unable to get users, please try again later.",
+    });
+    console.log(error);
   }
 };
 
