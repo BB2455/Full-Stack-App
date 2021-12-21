@@ -8,7 +8,7 @@ import Spinner from "react-bootstrap/Spinner";
 
 const User = () => {
   const [editUser, setEditUser] = React.useState(false);
-  const { user, isLoading } = useSelector((state) => state.users);
+  const { user, isLoading, error } = useSelector((state) => state.users);
   const dispatch = useDispatch();
 
   let { id } = useParams();
@@ -45,6 +45,8 @@ const User = () => {
             />
           )}
         </>
+      ) : error ? (
+        <h1>{error}</h1>
       ) : (
         <h1>No User Found</h1>
       )}

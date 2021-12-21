@@ -10,6 +10,7 @@ import {
   ERROR,
 } from "../constants/actionTypes";
 import * as api from "../api";
+import { getErrorStatus } from "../utils/getErrorStatus";
 
 export const getUsers = (page) => async (dispatch) => {
   try {
@@ -26,9 +27,14 @@ export const getUsers = (page) => async (dispatch) => {
     dispatch({ type: END_LOADING });
   } catch (error) {
     dispatch({ type: END_LOADING });
+    const statusCode = getErrorStatus(error.message);
+    const errorMessage =
+      statusCode && statusCode === "400"
+        ? "Not a valid page number"
+        : "Unable to get users, please try again later";
     dispatch({
       type: ERROR,
-      payload: "Unable to get users, please try again later.",
+      payload: errorMessage,
     });
     console.log(error.message);
   }
@@ -42,8 +48,14 @@ export const getUser = (id) => async (dispatch) => {
     dispatch({ type: END_LOADING });
   } catch (error) {
     dispatch({ type: END_LOADING });
-    dispatch({ type: ERROR, payload: "Something went wrong" });
-    console.log(error.message);
+    const statusCode = getErrorStatus(error.message);
+    const errorMessage =
+      statusCode && statusCode === "400"
+        ? "Not a valid User ID"
+        : statusCode && statusCode === "404"
+        ? "No User Found"
+        : "Something went wrong";
+    dispatch({ type: ERROR, payload: errorMessage });
   }
 };
 
@@ -62,9 +74,16 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
     dispatch({ type: END_LOADING });
   } catch (error) {
     dispatch({ type: END_LOADING });
+    const statusCode = getErrorStatus(error.message);
+    const errorMessage =
+      statusCode && statusCode === "400"
+        ? "Not valid search query, please try again."
+        : statusCode && statusCode === "404"
+        ? "No Results Found"
+        : "Unable to get users, please try again later.";
     dispatch({
       type: ERROR,
-      payload: "Unable to get users, please try again later.",
+      payload: errorMessage,
     });
     console.log(error.message);
   }
