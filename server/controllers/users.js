@@ -4,12 +4,14 @@ import User from "../models/user.js";
 export const getUsers = async (req, res) => {
   const { page } = req.params;
   try {
+    let getPage = page ? page : 1;
     const LIMIT = 12;
     const total = await User.countDocuments();
+    if (getPage < 1) getPage = 1;
     const numberOfPages = Math.ceil(total / LIMIT);
-    if (page > numberOfPages || page < 1)
+    if (total >= 1 && getPage > numberOfPages)
       return res.status(400).json({ message: "Not a valid page request" });
-    const startIndex = (Number(page) - 1) * LIMIT;
+    const startIndex = (Number(getPage) - 1) * LIMIT;
     const users = await User.find()
       .sort({ _id: -1 })
       .limit(LIMIT)
@@ -17,7 +19,7 @@ export const getUsers = async (req, res) => {
 
     res.status(200).json({
       data: users,
-      currentPage: Number(page),
+      currentPage: Number(getPage),
       numberOfPages: numberOfPages,
       results: total,
     });
@@ -46,8 +48,9 @@ export const getUsersBySearch = async (req, res) => {
     const LIMIT = 12;
     const getPage = page || 1;
     const startIndex = (Number(getPage) - 1) * LIMIT;
+    let searchRegEx;
     try {
-      const searchRegEx = search ? new RegExp(search, "i") : /[\d\D]+/i;
+      searchRegEx = search ? new RegExp(search, "i") : /[\d\D]+/i;
     } catch (error) {
       return res
         .status(400)
@@ -99,7 +102,8 @@ export const getUsersBySearch = async (req, res) => {
     ).sort(getOrder);
     const total = users.length;
 
-    if (!users) return res.status(404).json({ message: "No Users Found" });
+    if (users.length < 1)
+      return res.status(404).json({ message: "No Users Found" });
 
     res.status(200).json({
       data: users.slice(startIndex, startIndex + LIMIT),
@@ -113,6 +117,7 @@ export const getUsersBySearch = async (req, res) => {
 };
 
 export const createUser = async (req, res) => {
+  console.log(req.body);
   const user = req.body;
   const newUser = new User(user);
 
