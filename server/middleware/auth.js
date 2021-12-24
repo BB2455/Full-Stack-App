@@ -5,6 +5,7 @@ dotenv.config();
 const SECRET = process.env.SECRET;
 
 const auth = async (req, res, next) => {
+  if (process.env.NODE_ENV === "TEST") return next();
   try {
     const token = req.headers.authorization.split(" ")[1];
 
