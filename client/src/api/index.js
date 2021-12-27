@@ -17,7 +17,7 @@ export const fetchPostsBySearch = (searchQuery) =>
   API.get(`/users/search${searchQuery.url || "?page=1"}`);
 export const createUser = (newUser) => API.post("/users", newUser);
 export const updateUser = (userId, updatedUser) =>
-  API.patch(`/users/${userId}`, updatedUser);
+  API.patch(`/users/id/${userId}`, updatedUser);
 export const deleteUser = (userId) => API.delete(`/users/id/${userId}`);
 
 export const login = (formData) => API.post(`/admin/login`, formData);
