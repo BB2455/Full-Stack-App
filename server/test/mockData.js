@@ -1,4 +1,6 @@
+import Admin from "../models/admin.js";
 import User from "../models/user.js";
+import bcrypt from "bcryptjs";
 
 export const data = [
   {
@@ -70,7 +72,17 @@ export const populateDataBase = async (num, done) => {
     try {
       await newUser.save();
     } catch (error) {
-      done(error);
+      return done ? done(error) : error;
     }
+  }
+};
+
+export const createAdmin = async (admin, password, done) => {
+  const newPassword = await bcrypt.hash(password, 12);
+  const newAdmin = new Admin({ username: admin, password: newPassword });
+  try {
+    await newAdmin.save();
+  } catch (error) {
+    return done ? done(error) : error;
   }
 };
