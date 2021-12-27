@@ -13,7 +13,7 @@ import { populateDataBase } from "../../mockData.js";
 
 let mongoServer;
 
-describe("GET /users", () => {
+describe("GET /users/:id", () => {
   before(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
@@ -27,6 +27,46 @@ describe("GET /users", () => {
   after(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
+  });
+
+  it("OK, body has data property", (done) => {
+    request(app)
+      .get("/users/1")
+      .then((res) => {
+        expect(res.body).to.haveOwnProperty("data");
+        done();
+      })
+      .catch((error) => done(error));
+  });
+
+  it("OK, body has currentPage property", (done) => {
+    request(app)
+      .get("/users/1")
+      .then((res) => {
+        expect(res.body).to.haveOwnProperty("currentPage");
+        done();
+      })
+      .catch((error) => done(error));
+  });
+
+  it("OK, body has numberOfPages property", (done) => {
+    request(app)
+      .get("/users/1")
+      .then((res) => {
+        expect(res.body).to.haveOwnProperty("numberOfPages");
+        done();
+      })
+      .catch((error) => done(error));
+  });
+
+  it("OK, body has results property", (done) => {
+    request(app)
+      .get("/users/1")
+      .then((res) => {
+        expect(res.body).to.haveOwnProperty("results");
+        done();
+      })
+      .catch((error) => done(error));
   });
 
   it("OK, getting users with no page number and empty database", (done) => {

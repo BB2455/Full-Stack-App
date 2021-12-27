@@ -13,7 +13,7 @@ import { populateDataBase } from "../../mockData.js";
 
 let mongoServer;
 
-describe("DELETE /users", () => {
+describe("DELETE /users/id/:id", () => {
   before(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
@@ -32,7 +32,7 @@ describe("DELETE /users", () => {
   // Populate with two users, get users, choose first to be deleted, delete user, get users again, check if user was deleted.
   it("OK, deleting one user", (done) => {
     populateDataBase(2, done)
-      .then((res) => {
+      .then(() => {
         request(app)
           .get("/users/1")
           .then((res) => {
