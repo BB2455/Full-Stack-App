@@ -1,13 +1,16 @@
-import app from "./app.js";
-import database from "./database/index.js";
-import dotenv from "dotenv";
-dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
 
-const PORT = process.env.PORT || 5000;
+import userRoutes from './routes/usersRoute.js';
+import adminRoutes from './routes/adminRoute.js';
 
-database
-  .connect()
-  .then(() =>
-    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`))
-  )
-  .catch((error) => console.log(error.message));
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+app.use(helmet());
+app.use('/users', userRoutes);
+app.use('/admin', adminRoutes);
+
+export default app;

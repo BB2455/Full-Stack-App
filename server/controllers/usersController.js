@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import User from "../models/user.js";
+import mongoose from 'mongoose';
+import User from '../models/user.js';
 
 export const getUsers = async (req, res) => {
   const { page } = req.params;
@@ -10,7 +10,7 @@ export const getUsers = async (req, res) => {
     if (getPage < 1) getPage = 1;
     const numberOfPages = Math.ceil(total / LIMIT);
     if (total >= 1 && getPage > numberOfPages)
-      return res.status(400).json({ message: "Not a valid page request" });
+      return res.status(400).json({ message: 'Not a valid page request' });
     const startIndex = (Number(getPage) - 1) * LIMIT;
     const users = await User.find()
       .sort({ _id: -1 })
@@ -31,13 +31,13 @@ export const getUsers = async (req, res) => {
 export const getUser = async (req, res) => {
   const { id: _id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(_id))
-    return res.status(400).json({ message: "Not a valid id" });
+    return res.status(400).json({ message: 'Not a valid id' });
   try {
     const user = await User.findById(_id);
-    if (!user) return res.status(404).json({ message: "No user with that id" });
+    if (!user) return res.status(404).json({ message: 'No user with that id' });
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: 'Something went wrong' });
   }
 };
 
@@ -50,16 +50,16 @@ export const getUsersBySearch = async (req, res) => {
     const startIndex = (Number(getPage) - 1) * LIMIT;
     let searchRegEx;
     try {
-      searchRegEx = search ? new RegExp(search, "i") : /[\d\D]+/i;
+      searchRegEx = search ? new RegExp(search, 'i') : /[\d\D]+/i;
     } catch (error) {
       return res
         .status(400)
-        .json({ message: "Invalid Character in Search Query" });
+        .json({ message: 'Invalid Character in Search Query' });
     }
     const searchName =
-      filterBy === "firstName"
+      filterBy === 'firstName'
         ? { first_name: searchRegEx }
-        : filterBy === "lastName"
+        : filterBy === 'lastName'
         ? { last_name: searchRegEx }
         : { $or: [{ first_name: searchRegEx }, { last_name: searchRegEx }] };
     const searchStartDate = startDate && {
@@ -68,26 +68,26 @@ export const getUsersBySearch = async (req, res) => {
     const searchEndDate = endDate && { createdAt: { $lte: new Date(endDate) } };
     let getOrder;
     switch (orderType) {
-      case "relevancy":
+      case 'relevancy':
         getOrder =
-          filterBy === "lastName"
-            ? { last_name: order === "ascending" ? 1 : -1 }
-            : { first_name: order === "ascending" ? 1 : -1 };
+          filterBy === 'lastName'
+            ? { last_name: order === 'ascending' ? 1 : -1 }
+            : { first_name: order === 'ascending' ? 1 : -1 };
         break;
-      case "first_name":
-        getOrder = { first_name: order === "ascending" ? 1 : -1 };
+      case 'first_name':
+        getOrder = { first_name: order === 'ascending' ? 1 : -1 };
         break;
-      case "last_name":
-        getOrder = { last_name: order === "ascending" ? 1 : -1 };
+      case 'last_name':
+        getOrder = { last_name: order === 'ascending' ? 1 : -1 };
         break;
-      case "created_at":
-        getOrder = { createdAt: order === "ascending" ? 1 : -1 };
+      case 'created_at':
+        getOrder = { createdAt: order === 'ascending' ? 1 : -1 };
         break;
-      case "updated_at":
-        getOrder = { updatedAt: order === "ascending" ? 1 : -1 };
+      case 'updated_at':
+        getOrder = { updatedAt: order === 'ascending' ? 1 : -1 };
         break;
       default:
-        getOrder = { first_name: order === "ascending" ? 1 : -1 };
+        getOrder = { first_name: order === 'ascending' ? 1 : -1 };
         break;
     }
 
@@ -103,7 +103,7 @@ export const getUsersBySearch = async (req, res) => {
     const total = users.length;
 
     if (users.length < 1)
-      return res.status(404).json({ message: "No Users Found" });
+      return res.status(404).json({ message: 'No Users Found' });
 
     res.status(200).json({
       data: users.slice(startIndex, startIndex + LIMIT),
@@ -112,7 +112,7 @@ export const getUsersBySearch = async (req, res) => {
       results: total,
     });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: 'Something went wrong' });
   }
 };
 
@@ -133,7 +133,7 @@ export const updateUser = async (req, res) => {
   const userData = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(_id))
-    return res.status(404).send("No user with that id");
+    return res.status(404).send('No user with that id');
 
   const updatedUser = await User.findByIdAndUpdate(_id, userData, {
     new: true,
@@ -145,12 +145,12 @@ export const deleteUser = async (req, res) => {
   const { id: _id } = req.params;
   try {
     if (!mongoose.Types.ObjectId.isValid(_id))
-      return res.status(400).send("Not a valid id");
+      return res.status(400).send('Not a valid id');
 
     const user = await User.findByIdAndDelete(_id);
-    if (!user) return res.status(404).json({ message: "No user with that id" });
-    res.status(200).json({ message: "User Deleted Successfully" });
+    if (!user) return res.status(404).json({ message: 'No user with that id' });
+    res.status(200).json({ message: 'User Deleted Successfully' });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: 'Something went wrong' });
   }
 };

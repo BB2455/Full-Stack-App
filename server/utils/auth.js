@@ -1,13 +1,13 @@
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 dotenv.config();
 const SECRET = process.env.SECRET;
 
 const auth = async (req, res, next) => {
-  if (process.env.NODE_ENV === "TEST") return next();
+  if (process.env.NODE_ENV === 'TEST') return next();
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.headers.authorization.split(' ')[1];
 
     if (token) {
       const decodedData = jwt.verify(token, SECRET);
@@ -16,7 +16,7 @@ const auth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: 'Something went wrong' });
   }
 };
 
