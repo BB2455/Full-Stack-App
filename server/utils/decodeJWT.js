@@ -5,7 +5,11 @@ dotenv.config();
 const SECRET = process.env.SECRET;
 
 const decodeJWT = (token) => {
-  return jwt.verify(token, SECRET);
+  try {
+    return jwt.verify(token, SECRET);
+  } catch (error) {
+    return { expired: true };
+  }
 };
 
 export default decodeJWT;

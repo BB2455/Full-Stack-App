@@ -24,7 +24,16 @@ export const login = async (req, res) => {
       username: existingAdmin.username,
       id: existingAdmin._id,
     });
-    res.status(200).json({ token });
+    const refreshToken = createJWT(
+      {
+        username: existingAdmin.username,
+        id: existingAdmin._id,
+      },
+      '30d'
+    );
+    existingAdmin.active_tokens.push(refreshToken);
+    await existingAdmin.save();
+    res.status(200).json({ token, refreshToken });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }
@@ -47,6 +56,14 @@ export const register = async (req, res) => {
       password: hashedPassword,
       email: lowerEmail,
     });
+    const refreshToken = createJWT(
+      {
+        username: lowerUsername,
+        id: newAdmin._id,
+      },
+      '30d'
+    );
+    newAdmin.active_tokens.push(refreshToken);
     await newAdmin.save();
     // Send Verification Email
     const token = createJWT({ username: lowerUsername, id: newAdmin._id });
@@ -57,13 +74,21 @@ export const register = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  const { username } = req.body;
+  const { username, refreshToken } = req.body;
   if (!username) return res.status(400).json({ message: 'Invalid Request' });
   const lowerUsername = username.toLowerCase();
   try {
     const existingAdmin = await AdminModal.findOne({ username: lowerUsername });
     if (!existingAdmin)
       return res.status(404).json({ message: 'Admin Not Found' });
+    // Remove RefreshToken from active_tokens
+    if (!refreshToken) {
+      existingAdmin.active_tokens.splice(0, existingAdmin.active_tokens.length);
+    } else {
+      const tokenIndex = existingAdmin.active_tokens.indexOf(refreshToken);
+      existingAdmin.active_tokens.splice(tokenIndex, 1);
+    }
+    await existingAdmin.save();
     const token = createJWT({}, '1');
     res.status(200).json(token);
   } catch (error) {
@@ -77,7 +102,8 @@ export const changePassword = async (req, res) => {
   if (!token || !oldPassword || !newPassword)
     return res.status(400).json({ message: 'Invalid Request' });
   try {
-    const { id } = decodeJWT(token);
+    const { id, expired } = decodeJWT(token);
+    if (expired) return res.status(400).json({ message: 'Token Expired' });
     // Get Existing Admin
     const existingAdmin = await AdminModal.findById(id);
     if (!existingAdmin)
@@ -94,6 +120,34 @@ export const changePassword = async (req, res) => {
     existingAdmin.password = hashedPassword;
     await existingAdmin.save();
     res.status(200).json({ message: 'Test' });
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  let token;
+  try {
+    if (!refreshToken) {
+      token = createJWT({}, '1');
+      return res.status(200).json(token);
+    } else {
+      const { username, id, expired } = decodeJWT(refreshToken);
+      if (expired) return res.status(200).json(createJWT({}, '1'));
+      const existingAdmin = await AdminModal.findById(id);
+      if (!existingAdmin)
+        return res.status(404).json({ message: "Admin doesn't exist" });
+      const active_token = existingAdmin.active_tokens.find(
+        (token) => token === refreshToken
+      );
+      if (active_token && !expired) {
+        token = createJWT({ username, id });
+      } else {
+        token = createJWT({}, '1');
+      }
+      res.status(200).json(token);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }
