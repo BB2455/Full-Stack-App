@@ -1,16 +1,12 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import decodeJWT from './decodeJWT.js';
 
-dotenv.config();
-const SECRET = process.env.SECRET;
-
-const auth = async (req, res, next) => {
+const authJWT = async (req, res, next) => {
   if (process.env.NODE_ENV === 'TEST') return next();
   try {
     const token = req.headers.authorization.split(' ')[1];
 
     if (token) {
-      const decodedData = jwt.verify(token, SECRET);
+      const decodedData = decodeJWT(token);
       req.userID = decodedData?.id;
     }
 
@@ -20,4 +16,4 @@ const auth = async (req, res, next) => {
   }
 };
 
-export default auth;
+export default authJWT;
