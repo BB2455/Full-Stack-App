@@ -7,6 +7,7 @@ import {
   refreshToken,
   forgotPassword,
   verifyEmail,
+  deleteAdmin,
 } from '../controllers/adminController.js';
 import authJWT from '../utils/authJWT.js';
 
@@ -20,5 +21,6 @@ router.post('/logout', logout);
 router.post('/refreshToken', refreshToken);
 router.post('/forgotPassword', forgotPassword);
 router.get('/verifyEmail/:token', verifyEmail);
+router.delete('/id/:id', authJWT, deleteAdmin);
 
 export default router;
