@@ -1,7 +1,12 @@
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import AdminModal from '../models/admin.js';
 import createJWT from '../utils/createJWT.js';
 import decodeJWT from '../utils/decodeJWT.js';
+import {
+  handleEmailVerification,
+  handleForgotPasswordEmail,
+} from '../utils/emailHandler.js';
 
 export const login = async (req, res) => {
   const { username, password } = req.body;
@@ -66,8 +71,19 @@ export const register = async (req, res) => {
     newAdmin.active_tokens.push(refreshToken);
     await newAdmin.save();
     // Send Verification Email
+    const verifyToken = createJWT(
+      {
+        username: lowerUsername,
+        id: newAdmin._id,
+      },
+      '30m'
+    );
+    handleEmailVerification(
+      email,
+      `http://localhost:3000/verify/${verifyToken}`
+    );
     const token = createJWT({ username: lowerUsername, id: newAdmin._id });
-    res.status(201).json({ token });
+    res.status(201).json({ token, refreshToken });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }
@@ -148,6 +164,44 @@ export const refreshToken = async (req, res) => {
       }
       res.status(200).json(token);
     }
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Invalid Request' });
+  const lowerEmail = email.toLowerCase();
+  try {
+    const existingAdmin = await AdminModal.findOne({ email: lowerEmail });
+    if (!existingAdmin)
+      return res.status(404).json({ message: "Admin doesn't exist" });
+    const resetToken = createJWT(
+      { username: existingAdmin.username, id: existingAdmin._id },
+      '30m'
+    );
+    handleForgotPasswordEmail(
+      lowerEmail,
+      `http://localhost:3000/resetPassword/${resetToken}`
+    );
+    res.status(200).json({ message: 'Sent Email' });
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+  if (!token) return res.status(400).json({ message: 'Not a valid token' });
+  const { id } = decodeJWT(token);
+  try {
+    const existingAdmin = await AdminModal.findById(id);
+    if (!existingAdmin)
+      return res.status(404).json({ message: "Admin doesn't exist" });
+    existingAdmin.verified_email = true;
+    await existingAdmin.save();
+    res.status(200).json({ message: 'Admin Email Successfully Verified' });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }

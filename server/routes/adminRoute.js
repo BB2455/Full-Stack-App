@@ -5,6 +5,8 @@ import {
   changePassword,
   logout,
   refreshToken,
+  forgotPassword,
+  verifyEmail,
 } from '../controllers/adminController.js';
 import authJWT from '../utils/authJWT.js';
 
@@ -16,5 +18,7 @@ router.patch('/changePassword', authJWT, changePassword);
 router.put('/changePassword', authJWT, changePassword);
 router.post('/logout', logout);
 router.post('/refreshToken', refreshToken);
+router.post('/forgotPassword', forgotPassword);
+router.get('/verifyEmail/:token', verifyEmail);
 
 export default router;
