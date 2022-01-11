@@ -1,13 +1,15 @@
 import bcrypt from 'bcryptjs';
 import AdminModal from '../models/admin.js';
-import createJWT from '../utils/createJWT.js';
-import decodeJWT from '../utils/decodeJWT.js';
+import generateAccessToken from '../utils/generateAccessToken.js';
+import generateRefreshToken from '../utils/generateRefreshToken.js';
+import decodeAccessToken from '../utils/decodeAccessToken.js';
+import decodeRefreshToken from '../utils/decodeRefreshToken.js';
+
 import {
   handleEmailVerification,
   handleForgotPasswordEmail,
 } from '../utils/emailHandler.js';
 import { DeleteSchema, RegisterSchema } from '../schemas/validationSchema.js';
-import Joi from 'joi';
 
 export const login = async (req, res) => {
   const { username, password } = req.body;
@@ -26,11 +28,11 @@ export const login = async (req, res) => {
     );
     if (!isPasswordCorrect)
       return res.status(400).json({ message: 'Invalid credentials' });
-    const token = createJWT({
+    const token = generateAccessToken({
       username: existingAdmin.username,
       id: existingAdmin._id,
     });
-    const refreshToken = createJWT(
+    const refreshToken = generateRefreshToken(
       {
         username: existingAdmin.username,
         id: existingAdmin._id,
@@ -62,7 +64,7 @@ export const register = async (req, res) => {
       password: hashedPassword,
       email: email,
     });
-    const refreshToken = createJWT(
+    const refreshToken = generateRefreshToken(
       {
         username: username,
         id: newAdmin._id,
@@ -72,18 +74,18 @@ export const register = async (req, res) => {
     newAdmin.active_tokens.push(refreshToken);
     await newAdmin.save();
     // Send Verification Email
-    const verifyToken = createJWT(
+    const verifyToken = generateAccessToken(
       {
         username: username,
         id: newAdmin._id,
       },
       '30m'
     );
-    // handleEmailVerification(
-    //   email,
-    //   `http://localhost:3000/verify/${verifyToken}`
-    // );
-    const token = createJWT({ username: username, id: newAdmin._id });
+    handleEmailVerification(
+      email,
+      `http://localhost:3000/verify/${verifyToken}`
+    );
+    const token = generateAccessToken({ username: username, id: newAdmin._id });
     res.status(201).json({ token, refreshToken });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
@@ -106,7 +108,7 @@ export const logout = async (req, res) => {
       existingAdmin.active_tokens.splice(tokenIndex, 1);
     }
     await existingAdmin.save();
-    const token = createJWT({}, '1');
+    const token = generateAccessToken({}, '1');
     res.status(200).json(token);
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
@@ -119,7 +121,7 @@ export const changePassword = async (req, res) => {
   if (!token || !oldPassword || !newPassword)
     return res.status(400).json({ message: 'Invalid Request' });
   try {
-    const { id, expired } = decodeJWT(token);
+    const { id, expired } = decodeAccessToken(token);
     if (expired) return res.status(400).json({ message: 'Token Expired' });
     // Get Existing Admin
     const existingAdmin = await AdminModal.findById(id);
@@ -147,11 +149,11 @@ export const refreshToken = async (req, res) => {
   let token;
   try {
     if (!refreshToken) {
-      token = createJWT({}, '1');
+      token = generateAccessToken({}, '1');
       return res.status(200).json(token);
     } else {
-      const { username, id, expired } = decodeJWT(refreshToken);
-      if (expired) return res.status(200).json(createJWT({}, '1'));
+      const { username, id, expired } = decodeRefreshToken(refreshToken);
+      if (expired) return res.status(200).json(generateAccessToken({}, '1'));
       const existingAdmin = await AdminModal.findById(id);
       if (!existingAdmin)
         return res.status(404).json({ message: "Admin doesn't exist" });
@@ -159,9 +161,9 @@ export const refreshToken = async (req, res) => {
         (token) => token === refreshToken
       );
       if (active_token && !expired) {
-        token = createJWT({ username, id });
+        token = generateAccessToken({ username, id });
       } else {
-        token = createJWT({}, '1');
+        token = generateAccessToken({}, '1');
       }
       res.status(200).json(token);
     }
@@ -178,7 +180,7 @@ export const forgotPassword = async (req, res) => {
     const existingAdmin = await AdminModal.findOne({ email: lowerEmail });
     if (!existingAdmin)
       return res.status(404).json({ message: "Admin doesn't exist" });
-    const resetToken = createJWT(
+    const resetToken = generateAccessToken(
       { username: existingAdmin.username, id: existingAdmin._id },
       '30m'
     );
@@ -195,7 +197,7 @@ export const forgotPassword = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   const { token } = req.params;
   if (!token) return res.status(400).json({ message: 'Not a valid token' });
-  const { id } = decodeJWT(token);
+  const { id } = decodeAccessToken(token);
   try {
     const existingAdmin = await AdminModal.findById(id);
     if (!existingAdmin)
@@ -219,7 +221,7 @@ export const deleteAdmin = async (req, res) => {
     if (!existingAdmin)
       return res.status(404).json({ message: "Admin doesn't exist" });
     //Logout Token
-    const token = createJWT({}, '1');
+    const token = generateAccessToken({}, '1');
     res.status(200).json({ token, message: 'Admin Deleted Successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
