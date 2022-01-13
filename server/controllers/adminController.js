@@ -41,7 +41,9 @@ export const login = async (req, res) => {
     );
     existingAdmin.active_tokens.push(refreshToken);
     await existingAdmin.save();
-    res.status(200).json({ token, refreshToken });
+    const oneWeek = 7 * 24 * 3600 * 1000; // One Week
+    res.cookie('jwt', refreshToken, { maxAge: oneWeek, httpOnly: true });
+    res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }
@@ -86,7 +88,9 @@ export const register = async (req, res) => {
       `http://localhost:3000/verify/${verifyToken}`
     );
     const token = generateAccessToken({ username: username, id: newAdmin._id });
-    res.status(201).json({ token, refreshToken });
+    const oneWeek = 7 * 24 * 3600 * 1000; // One Week
+    res.cookie('jwt', refreshToken, { maxAge: oneWeek, httpOnly: true });
+    res.status(201).json({ token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }
@@ -109,6 +113,7 @@ export const logout = async (req, res) => {
     }
     await existingAdmin.save();
     const token = generateAccessToken({}, '1');
+    res.clearCookie('jwt', { maxAge: -1, httpOnly: true });
     res.status(200).json(token);
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
@@ -145,7 +150,7 @@ export const changePassword = async (req, res) => {
 };
 
 export const refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies?.jwt;
   let token;
   try {
     if (!refreshToken) {
