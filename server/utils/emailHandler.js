@@ -1,48 +1,45 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
+import nodemailer from 'nodemailer'
 
-dotenv.config();
-const EMAIL = process.env.EMAIL;
-const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+dotenv.config()
+const EMAIL = process.env.EMAIL
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD
 
 const transporter = nodemailer.createTransport({
-  service: 'outlook',
+  auth: {
+    pass: EMAIL_PASSWORD,
+    user: EMAIL,
+  },
   port: 587,
   secure: false,
-  auth: {
-    user: EMAIL,
-    pass: EMAIL_PASSWORD,
-  },
-});
+  service: 'outlook',
+})
 
 const sendEmail = async (message) => {
-  const fullMessage = Object.assign(
-    { from: `Node Mailer <${EMAIL}>` },
-    message
-  );
+  const fullMessage = {from: `Node Mailer <${EMAIL}>`, ...message}
   try {
-    await transporter.sendMail(fullMessage);
+    await transporter.sendMail(fullMessage)
   } catch (error) {
-    console.error('Something went wrong with email', error);
+    console.error('Something went wrong with email', error)
   }
-};
+}
 
 export const handleEmailVerification = async (email, url) => {
   const message = {
-    to: email,
+    html: `<p>Click Here to verify your account:</p><a href=${url} target="_blank">${url}</a>`,
     subject: 'Node Mailer Email Verification',
     text: `Click here to verify your account: \n ${url}`,
-    html: `<p>Click Here to verify your account:</p><a href=${url} target="_blank">${url}</a>`,
-  };
-  await sendEmail(message);
-};
+    to: email,
+  }
+  await sendEmail(message)
+}
 
 export const handleForgotPasswordEmail = async (email, url) => {
   const message = {
-    to: email,
+    html: `<p>Click Here to reset your account:</p><a href=${url} target="_blank">${url}</a>`,
     subject: 'Node Mailer Password Reset',
     text: `Click here to reset your account: \n ${url}`,
-    html: `<p>Click Here to reset your account:</p><a href=${url} target="_blank">${url}</a>`,
-  };
-  await sendEmail(message);
-};
+    to: email,
+  }
+  await sendEmail(message)
+}

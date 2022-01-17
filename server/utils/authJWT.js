@@ -1,19 +1,19 @@
-import decodeAccessToken from './decodeAccessToken.js';
+import decodeAccessToken from './decodeAccessToken.js'
 
 const authJWT = async (req, res, next) => {
-  if (process.env.NODE_ENV === 'TEST') return next();
+  if (process.env.NODE_ENV === 'TEST') return next()
   try {
-    const token = req.headers.authorization.split(' ')[1];
+    const token = req.headers.authorization.split(' ')[1]
 
     if (token) {
-      const decodedData = decodeAccessToken(token);
-      req.userID = decodedData?.id;
+      const decodedData = decodeAccessToken(token)
+      req.userID = decodedData?.id
     }
 
-    next();
+    next()
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
-export default authJWT;
+export default authJWT

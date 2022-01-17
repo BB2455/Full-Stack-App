@@ -1,15 +1,15 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
 
-dotenv.config();
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
+dotenv.config()
+const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET
 
 const decodeRefreshToken = (token) => {
   try {
-    return jwt.verify(token, REFRESH_SECRET);
-  } catch (error) {
-    return { expired: true };
+    return jwt.verify(token, REFRESH_SECRET)
+  } catch {
+    return { expired: true }
   }
-};
+}
 
-export default decodeRefreshToken;
+export default decodeRefreshToken

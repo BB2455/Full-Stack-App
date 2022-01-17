@@ -1,234 +1,247 @@
-import bcrypt from 'bcryptjs';
-import AdminModal from '../models/admin.js';
-import generateAccessToken from '../utils/generateAccessToken.js';
-import generateRefreshToken from '../utils/generateRefreshToken.js';
-import decodeAccessToken from '../utils/decodeAccessToken.js';
-import decodeRefreshToken from '../utils/decodeRefreshToken.js';
-
+import bcrypt from 'bcryptjs'
+import AdminModal from '../models/admin.js'
+import { DeleteSchema,
+  RegisterSchema } from '../schemas/validationSchema.js'
+import decodeAccessToken from '../utils/decodeAccessToken.js'
+import decodeRefreshToken from '../utils/decodeRefreshToken.js'
 import {
   handleEmailVerification,
   handleForgotPasswordEmail,
-} from '../utils/emailHandler.js';
-import { DeleteSchema, RegisterSchema } from '../schemas/validationSchema.js';
+} from '../utils/emailHandler.js'
+import generateAccessToken from '../utils/generateAccessToken.js'
+import generateRefreshToken from '../utils/generateRefreshToken.js'
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { username,
+    password } = req.body
   if (!username || !password)
-    return res.status(400).json({ message: 'Invalid Request' });
-  const lowerUsername = username.toLowerCase();
+    return res.status(400).json({ message: 'Invalid Request' })
+  const lowerUsername = username.toLowerCase()
   try {
     const existingAdmin = await AdminModal.findOne({
       username: lowerUsername,
-    });
+    })
     if (!existingAdmin)
-      return res.status(404).json({ message: "Admin doesn't exist" });
+      return res.status(404).json({ message: 'Admin doesn\'t exist' })
     const isPasswordCorrect = await bcrypt.compare(
       password,
       existingAdmin.password
-    );
+    )
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid credentials' })
     const token = generateAccessToken({
-      username: existingAdmin.username,
       id: existingAdmin._id,
-    });
+      username: existingAdmin.username,
+    })
     const refreshToken = generateRefreshToken(
       {
-        username: existingAdmin.username,
         id: existingAdmin._id,
+        username: existingAdmin.username,
       },
       '30d'
-    );
-    existingAdmin.active_tokens.push(refreshToken);
-    await existingAdmin.save();
-    const oneWeek = 7 * 24 * 3600 * 1000; // One Week
-    res.cookie('jwt', refreshToken, { maxAge: oneWeek, httpOnly: true });
-    res.status(200).json({ token });
+    )
+    existingAdmin.active_tokens.push(refreshToken)
+    await existingAdmin.save()
+    // One Week
+    const oneWeek = 7 * 24 * 3600 * 1000
+    res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: oneWeek})
+    res.status(200).json({ token })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
 export const register = async (req, res) => {
   const {
-    value: { username, password, email },
-    error,
-  } = RegisterSchema.validate(req.body);
-  if (error) return res.status(422).json({ message: error.message });
+    value: { username,
+      password,
+      email },
+    joiError,
+  } = RegisterSchema.validate(req.body)
+  if (joiError) return res.status(422).json({ message: joiError.message })
   try {
-    const existingAdmin = await AdminModal.findOne({ username });
+    const existingAdmin = await AdminModal.findOne({ username })
     if (existingAdmin)
-      return res.status(409).json({ message: 'Admin already exists' });
+      return res.status(409).json({ message: 'Admin already exists' })
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12)
     const newAdmin = new AdminModal({
-      username: username,
+      email,
       password: hashedPassword,
-      email: email,
-    });
+      username,
+    })
     const refreshToken = generateRefreshToken(
       {
-        username: username,
         id: newAdmin._id,
+        username,
       },
       '30d'
-    );
-    newAdmin.active_tokens.push(refreshToken);
-    await newAdmin.save();
+    )
+    newAdmin.active_tokens.push(refreshToken)
+    await newAdmin.save()
     // Send Verification Email
     const verifyToken = generateAccessToken(
       {
-        username: username,
         id: newAdmin._id,
+        username,
       },
       '30m'
-    );
+    )
     handleEmailVerification(
       email,
       `http://localhost:3000/verify/${verifyToken}`
-    );
-    const token = generateAccessToken({ username: username, id: newAdmin._id });
-    const oneWeek = 7 * 24 * 3600 * 1000; // One Week
-    res.cookie('jwt', refreshToken, { maxAge: oneWeek, httpOnly: true });
-    res.status(201).json({ token });
+    )
+    const token = generateAccessToken({ id: newAdmin._id, username })
+    // One Week
+    const oneWeek = 7 * 24 * 3600 * 1000
+    res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: oneWeek })
+    res.status(201).json({ token })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
 export const logout = async (req, res) => {
-  const { username, refreshToken } = req.body;
-  if (!username) return res.status(400).json({ message: 'Invalid Request' });
-  const lowerUsername = username.toLowerCase();
+  const { username,
+    refreshToken} = req.body
+  if (!username) return res.status(400).json({ message: 'Invalid Request' })
+  const lowerUsername = username.toLowerCase()
   try {
-    const existingAdmin = await AdminModal.findOne({ username: lowerUsername });
+    const existingAdmin = await AdminModal.findOne({ username: lowerUsername })
     if (!existingAdmin)
-      return res.status(404).json({ message: 'Admin Not Found' });
+      return res.status(404).json({ message: 'Admin Not Found' })
     // Remove RefreshToken from active_tokens
-    if (!refreshToken) {
-      existingAdmin.active_tokens.splice(0, existingAdmin.active_tokens.length);
+    if (refreshToken) {
+      const tokenIndex = existingAdmin.active_tokens.indexOf(refreshToken)
+      existingAdmin.active_tokens.splice(tokenIndex, 1)
     } else {
-      const tokenIndex = existingAdmin.active_tokens.indexOf(refreshToken);
-      existingAdmin.active_tokens.splice(tokenIndex, 1);
+      existingAdmin.active_tokens.splice(0, existingAdmin.active_tokens.length)
     }
-    await existingAdmin.save();
-    const token = generateAccessToken({}, '1');
-    res.clearCookie('jwt', { maxAge: -1, httpOnly: true });
-    res.status(200).json(token);
+
+    await existingAdmin.save()
+    const token = generateAccessToken({}, '1')
+    res.clearCookie('jwt', { httpOnly: true, maxAge: -1 })
+    res.status(200).json(token)
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
 export const changePassword = async (req, res) => {
-  const { token } = req.query;
-  const { oldPassword, newPassword } = req.body;
+  const { token } = req.query
+  const { oldPassword,
+    newPassword } = req.body
   if (!token || !oldPassword || !newPassword)
-    return res.status(400).json({ message: 'Invalid Request' });
+    return res.status(400).json({ message: 'Invalid Request' })
   try {
-    const { id, expired } = decodeAccessToken(token);
-    if (expired) return res.status(400).json({ message: 'Token Expired' });
+    const { id,
+      expired } = decodeAccessToken(token)
+    if (expired) return res.status(400).json({ message: 'Token Expired' })
     // Get Existing Admin
-    const existingAdmin = await AdminModal.findById(id);
+    const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin)
-      return res.status(404).json({ message: "Admin doesn't exist" });
+      return res.status(404).json({ message: 'Admin doesn\'t exist' })
     // Check If Correct Password
     const isPasswordCorrect = await bcrypt.compare(
       oldPassword,
       existingAdmin.password
-    );
+    )
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid credentials' })
     // Set New Password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-    existingAdmin.password = hashedPassword;
-    await existingAdmin.save();
-    res.status(200).json({ message: 'Test' });
+    const hashedPassword = await bcrypt.hash(newPassword, 12)
+    existingAdmin.password = hashedPassword
+    await existingAdmin.save()
+    res.status(200).json({ message: 'Test' })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
-export const refreshToken = async (req, res) => {
-  const refreshToken = req.cookies?.jwt;
-  let token;
+export const refresh_token = async (req, res) => {
+  const refreshToken = req.cookies?.jwt
+  let token
   try {
-    if (!refreshToken) {
-      token = generateAccessToken({}, '1');
-      return res.status(200).json(token);
-    } else {
-      const { username, id, expired } = decodeRefreshToken(refreshToken);
-      if (expired) return res.status(200).json(generateAccessToken({}, '1'));
-      const existingAdmin = await AdminModal.findById(id);
+    if (refreshToken) {
+      const { expired,
+        id,
+        username } = decodeRefreshToken(refreshToken)
+      if (expired) return res.status(200).json(generateAccessToken({}, '1'))
+      const existingAdmin = await AdminModal.findById(id)
       if (!existingAdmin)
-        return res.status(404).json({ message: "Admin doesn't exist" });
+        return res.status(404).json({ message: 'Admin doesn\'t exist' })
       const active_token = existingAdmin.active_tokens.find(
-        (token) => token === refreshToken
-      );
+        (existingtoken) => existingtoken === refreshToken
+      )
       if (active_token && !expired) {
-        token = generateAccessToken({ username, id });
+        token = generateAccessToken({ id, username })
       } else {
-        token = generateAccessToken({}, '1');
+        token = generateAccessToken({}, '1')
       }
-      res.status(200).json(token);
+
+      res.status(200).json(token)
+    } else {
+      token = generateAccessToken({}, '1')
+      return res.status(200).json(token)
     }
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
 export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ message: 'Invalid Request' });
-  const lowerEmail = email.toLowerCase();
+  const { email } = req.body
+  if (!email) return res.status(400).json({ message: 'Invalid Request' })
+  const lowerEmail = email.toLowerCase()
   try {
-    const existingAdmin = await AdminModal.findOne({ email: lowerEmail });
+    const existingAdmin = await AdminModal.findOne({ email: lowerEmail })
     if (!existingAdmin)
-      return res.status(404).json({ message: "Admin doesn't exist" });
+      return res.status(404).json({ message: 'Admin doesn\'t exist' })
     const resetToken = generateAccessToken(
-      { username: existingAdmin.username, id: existingAdmin._id },
+      { id: existingAdmin._id,
+        username: existingAdmin.username,  },
       '30m'
-    );
+    )
     handleForgotPasswordEmail(
       lowerEmail,
       `http://localhost:3000/resetPassword/${resetToken}`
-    );
-    res.status(200).json({ message: 'Sent Email' });
+    )
+    res.status(200).json({ message: 'Sent Email' })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
 export const verifyEmail = async (req, res) => {
-  const { token } = req.params;
-  if (!token) return res.status(400).json({ message: 'Not a valid token' });
-  const { id } = decodeAccessToken(token);
+  const { token } = req.params
+  if (!token) return res.status(400).json({ message: 'Not a valid token' })
+  const { id } = decodeAccessToken(token)
   try {
-    const existingAdmin = await AdminModal.findById(id);
+    const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin)
-      return res.status(404).json({ message: "Admin doesn't exist" });
-    existingAdmin.verified_email = true;
-    await existingAdmin.save();
-    res.status(200).json({ message: 'Admin Email Successfully Verified' });
+      return res.status(404).json({ message: 'Admin doesn\'t exist' })
+    existingAdmin.verified_email = true
+    await existingAdmin.save()
+    res.status(200).json({ message: 'Admin Email Successfully Verified' })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
 export const deleteAdmin = async (req, res) => {
   const {
     value: { id },
-    error,
-  } = DeleteSchema.validate(req.params);
-  if (error) return res.status(422).json({ message: error.message });
+    joiError,
+  } = DeleteSchema.validate(req.params)
+  if (joiError) return res.status(422).json({ message: joiError.message })
   try {
-    const existingAdmin = await AdminModal.findByIdAndDelete(id);
+    const existingAdmin = await AdminModal.findByIdAndDelete(id)
     if (!existingAdmin)
-      return res.status(404).json({ message: "Admin doesn't exist" });
-    //Logout Token
-    const token = generateAccessToken({}, '1');
-    res.status(200).json({ token, message: 'Admin Deleted Successfully' });
+      return res.status(404).json({ message: 'Admin doesn\'t exist' })
+    // Logout Token
+    const token = generateAccessToken({}, '1')
+    res.status(200).json({ message: 'Admin Deleted Successfully', token })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: error.message })
   }
-};
+}
