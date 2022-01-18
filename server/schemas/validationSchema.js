@@ -9,3 +9,8 @@ export const RegisterSchema = Joi.object({
 export const DeleteSchema = Joi.object({
   id: Joi.string(),
 })
+
+export const LoginSchema = Joi.object({
+  password: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
+  username: Joi.string().alphanum().min(3).max(30).lowercase().required(),
+})

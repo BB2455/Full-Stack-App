@@ -1,6 +1,8 @@
+import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import AdminModal from '../models/admin.js'
 import { DeleteSchema,
+  LoginSchema,
   RegisterSchema } from '../schemas/validationSchema.js'
 import decodeAccessToken from '../utils/decodeAccessToken.js'
 import decodeRefreshToken from '../utils/decodeRefreshToken.js'
@@ -9,43 +11,40 @@ import {
   handleForgotPasswordEmail,
 } from '../utils/emailHandler.js'
 import generateAccessToken from '../utils/generateAccessToken.js'
-import generateRefreshToken from '../utils/generateRefreshToken.js'
+import generateTokens from '../utils/generateTokens.js'
 
 export const login = async (req, res) => {
-  const { username,
-    password } = req.body
-  if (!username || !password)
-    return res.status(400).json({ message: 'Invalid Request' })
-  const lowerUsername = username.toLowerCase()
+  const {value: {
+    password,
+    username
+  },
+  error: JoiError} = LoginSchema.validate(req.body)
+  if (JoiError) return res.json(Boom.badData(JoiError.message))
   try {
     const existingAdmin = await AdminModal.findOne({
-      username: lowerUsername,
+      username,
     })
+    // Check if admin exists
     if (!existingAdmin)
-      return res.status(404).json({ message: 'Admin doesn\'t exist' })
+      return res.json(Boom.notFound('Admin doesn\'t exist'))
     const isPasswordCorrect = await bcrypt.compare(
       password,
       existingAdmin.password
     )
+    // Check if Password is correct
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: 'Invalid credentials' })
-    const token = generateAccessToken({
-      id: existingAdmin._id,
-      username: existingAdmin.username,
-    })
-    const refreshToken = generateRefreshToken(
-      {
-        id: existingAdmin._id,
-        username: existingAdmin.username,
-      },
-      '30d'
-    )
+      return res.json(Boom.unauthorized('Invalid Password'))
+    // Get tokens
+    const {
+      accessToken,
+      refreshToken
+    } = generateTokens(existingAdmin._id, username)
     existingAdmin.active_tokens.push(refreshToken)
     await existingAdmin.save()
-    // One Week
+    // One Week Time
     const oneWeek = 7 * 24 * 3600 * 1000
-    res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: oneWeek})
-    res.status(200).json({ token })
+    res.cookie('refresh_token', refreshToken, { httpOnly: true, maxAge: oneWeek})
+    res.status(200).json({ accessToken })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -53,9 +52,11 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   const {
-    value: { username,
+    value: {
+      username,
       password,
-      email },
+      email
+    },
     joiError,
   } = RegisterSchema.validate(req.body)
   if (joiError) return res.status(422).json({ message: joiError.message })
@@ -70,13 +71,10 @@ export const register = async (req, res) => {
       password: hashedPassword,
       username,
     })
-    const refreshToken = generateRefreshToken(
-      {
-        id: newAdmin._id,
-        username,
-      },
-      '30d'
-    )
+    const {
+      accessToken,
+      refreshToken
+    } = generateTokens(existingAdmin._id, username)
     newAdmin.active_tokens.push(refreshToken)
     await newAdmin.save()
     // Send Verification Email
@@ -91,11 +89,10 @@ export const register = async (req, res) => {
       email,
       `http://localhost:3000/verify/${verifyToken}`
     )
-    const token = generateAccessToken({ id: newAdmin._id, username })
     // One Week
     const oneWeek = 7 * 24 * 3600 * 1000
-    res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: oneWeek })
-    res.status(201).json({ token })
+    res.cookie('refresh_token', refreshToken, { httpOnly: true, maxAge: oneWeek })
+    res.status(201).json({ accessToken })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -120,7 +117,7 @@ export const logout = async (req, res) => {
 
     await existingAdmin.save()
     const token = generateAccessToken({}, '1')
-    res.clearCookie('jwt', { httpOnly: true, maxAge: -1 })
+    res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
     res.status(200).json(token)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -152,7 +149,7 @@ export const changePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 12)
     existingAdmin.password = hashedPassword
     await existingAdmin.save()
-    res.status(200).json({ message: 'Test' })
+    res.status(200).json({ message: 'Password Changed Successfully' })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -199,7 +196,7 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: 'Admin doesn\'t exist' })
     const resetToken = generateAccessToken(
       { id: existingAdmin._id,
-        username: existingAdmin.username,  },
+        username: existingAdmin.username  },
       '30m'
     )
     handleForgotPasswordEmail(

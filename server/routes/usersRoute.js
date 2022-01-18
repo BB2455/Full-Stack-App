@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   getUsers,
+  getAllUsers,
   getUser,
   createUser,
   updateUser,
@@ -13,6 +14,7 @@ const router = express.Router()
 
 router.get('/search', getUsersBySearch)
 router.get('/id/:id', getUser)
+router.get('/', getAllUsers)
 router.get('/:page', getUsers)
 router.post('/', authJWT, createUser)
 router.patch('/id/:id', authJWT, updateUser)

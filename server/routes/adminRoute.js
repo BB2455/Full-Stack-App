@@ -4,7 +4,7 @@ import {
   register,
   changePassword,
   logout,
-  refreshToken,
+  refresh_token,
   forgotPassword,
   verifyEmail,
   deleteAdmin,
@@ -18,7 +18,7 @@ router.post('/register', register)
 router.patch('/changePassword', authJWT, changePassword)
 router.put('/changePassword', authJWT, changePassword)
 router.post('/logout', logout)
-router.post('/refreshToken', refreshToken)
+router.post('/refreshToken', refresh_token)
 router.post('/forgotPassword', forgotPassword)
 router.get('/verifyEmail/:token', verifyEmail)
 router.delete('/id/:id', authJWT, deleteAdmin)

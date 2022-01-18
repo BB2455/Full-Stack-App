@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
-import database from './database'
+// eslint-disable-next-line unicorn/import-index
+import database from './database/index.js'
 import app from './server.js'
 
 dotenv.config()
@@ -13,5 +14,8 @@ try {
   console.error(error)
 }
 
-app.listen(PORT, () => console.info(`Server running on port: ${PORT}`))
-  .catch((error) => console.error(error.message))
+try {
+  app.listen(PORT, () => console.info(`Server running on port: ${PORT}`))
+} catch (error) {
+  console.error(error.message)
+}
