@@ -8,7 +8,7 @@ const decodeRefreshToken = (token) => {
   try {
     return jwt.verify(token, REFRESH_SECRET)
   } catch {
-    return { expired: true }
+    throw new Error('Expired Token')
   }
 }
 

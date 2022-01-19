@@ -1,9 +1,6 @@
 import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import AdminModal from '../models/admin.js'
-import { DeleteSchema,
-  LoginSchema,
-  RegisterSchema } from '../schemas/validationSchema.js'
 import decodeAccessToken from '../utils/decodeAccessToken.js'
 import decodeRefreshToken from '../utils/decodeRefreshToken.js'
 import {
@@ -14,19 +11,16 @@ import generateAccessToken from '../utils/generateAccessToken.js'
 import generateTokens from '../utils/generateTokens.js'
 
 export const login = async (req, res) => {
-  const {value: {
+  const {
     password,
     username
-  },
-  error: JoiError} = LoginSchema.validate(req.body)
-  if (JoiError) return res.json(Boom.badData(JoiError.message))
+  } = req.body
   try {
     const existingAdmin = await AdminModal.findOne({
       username,
     })
     // Check if admin exists
-    if (!existingAdmin)
-      return res.json(Boom.notFound('Admin doesn\'t exist'))
+    if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
     const isPasswordCorrect = await bcrypt.compare(
       password,
       existingAdmin.password
@@ -38,12 +32,18 @@ export const login = async (req, res) => {
     const {
       accessToken,
       refreshToken
-    } = generateTokens(existingAdmin._id, username)
+    } = generateTokens(
+      existingAdmin._id,
+      username
+    )
     existingAdmin.active_tokens.push(refreshToken)
     await existingAdmin.save()
     // One Week Time
     const oneWeek = 7 * 24 * 3600 * 1000
-    res.cookie('refresh_token', refreshToken, { httpOnly: true, maxAge: oneWeek})
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      maxAge: oneWeek,
+    })
     res.status(200).json({ accessToken })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -52,14 +52,10 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   const {
-    value: {
-      username,
-      password,
-      email
-    },
-    joiError,
-  } = RegisterSchema.validate(req.body)
-  if (joiError) return res.status(422).json({ message: joiError.message })
+    username,
+    password,
+    email
+  } = req.body
   try {
     const existingAdmin = await AdminModal.findOne({ username })
     if (existingAdmin)
@@ -74,7 +70,10 @@ export const register = async (req, res) => {
     const {
       accessToken,
       refreshToken
-    } = generateTokens(existingAdmin._id, username)
+    } = generateTokens(
+      existingAdmin._id,
+      username
+    )
     newAdmin.active_tokens.push(refreshToken)
     await newAdmin.save()
     // Send Verification Email
@@ -91,7 +90,10 @@ export const register = async (req, res) => {
     )
     // One Week
     const oneWeek = 7 * 24 * 3600 * 1000
-    res.cookie('refresh_token', refreshToken, { httpOnly: true, maxAge: oneWeek })
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      maxAge: oneWeek,
+    })
     res.status(201).json({ accessToken })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -99,43 +101,35 @@ export const register = async (req, res) => {
 }
 
 export const logout = async (req, res) => {
-  const { username,
-    refreshToken} = req.body
-  if (!username) return res.status(400).json({ message: 'Invalid Request' })
-  const lowerUsername = username.toLowerCase()
   try {
-    const existingAdmin = await AdminModal.findOne({ username: lowerUsername })
-    if (!existingAdmin)
+    const refreshToken = req.cookies.refresh_token
+    const { id } = decodeRefreshToken(refreshToken)
+    const existingAdmin = await AdminModal.findById(id)
+    if (!existingAdmin) {
+      res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
       return res.status(404).json({ message: 'Admin Not Found' })
-    // Remove RefreshToken from active_tokens
-    if (refreshToken) {
-      const tokenIndex = existingAdmin.active_tokens.indexOf(refreshToken)
-      existingAdmin.active_tokens.splice(tokenIndex, 1)
-    } else {
-      existingAdmin.active_tokens.splice(0, existingAdmin.active_tokens.length)
     }
 
+    // Remove RefreshToken from active_tokens
+    const tokenIndex = existingAdmin.active_tokens.indexOf(refreshToken)
+    existingAdmin.active_tokens.splice(tokenIndex, 1)
     await existingAdmin.save()
-    const token = generateAccessToken({}, '1')
+    // Clear cookies, send expired token
     res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
-    res.status(200).json(token)
+    res.status(200).json({ message: 'Logout Successful' })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
 }
 
 export const changePassword = async (req, res) => {
-  const { token } = req.query
-  const { oldPassword,
-    newPassword } = req.body
-  if (!token || !oldPassword || !newPassword)
-    return res.status(400).json({ message: 'Invalid Request' })
+  const {
+    oldPassword,
+    newPassword
+  } = req.body
   try {
-    const { id,
-      expired } = decodeAccessToken(token)
-    if (expired) return res.status(400).json({ message: 'Token Expired' })
     // Get Existing Admin
-    const existingAdmin = await AdminModal.findById(id)
+    const existingAdmin = await AdminModal.findById(req.userID)
     if (!existingAdmin)
       return res.status(404).json({ message: 'Admin doesn\'t exist' })
     // Check If Correct Password
@@ -156,13 +150,15 @@ export const changePassword = async (req, res) => {
 }
 
 export const refresh_token = async (req, res) => {
-  const refreshToken = req.cookies?.jwt
+  const refreshToken = req.cookies?.refresh_token
   let token
   try {
     if (refreshToken) {
-      const { expired,
+      const {
+        expired,
         id,
-        username } = decodeRefreshToken(refreshToken)
+        username
+      } = decodeRefreshToken(refreshToken)
       if (expired) return res.status(200).json(generateAccessToken({}, '1'))
       const existingAdmin = await AdminModal.findById(id)
       if (!existingAdmin)
@@ -170,7 +166,7 @@ export const refresh_token = async (req, res) => {
       const active_token = existingAdmin.active_tokens.find(
         (existingtoken) => existingtoken === refreshToken
       )
-      if (active_token && !expired) {
+      if (active_token) {
         token = generateAccessToken({ id, username })
       } else {
         token = generateAccessToken({}, '1')
@@ -188,19 +184,16 @@ export const refresh_token = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   const { email } = req.body
-  if (!email) return res.status(400).json({ message: 'Invalid Request' })
-  const lowerEmail = email.toLowerCase()
   try {
-    const existingAdmin = await AdminModal.findOne({ email: lowerEmail })
+    const existingAdmin = await AdminModal.findOne({ email })
     if (!existingAdmin)
       return res.status(404).json({ message: 'Admin doesn\'t exist' })
     const resetToken = generateAccessToken(
-      { id: existingAdmin._id,
-        username: existingAdmin.username  },
+      { id: existingAdmin._id, username: existingAdmin.username },
       '30m'
     )
     handleForgotPasswordEmail(
-      lowerEmail,
+      email,
       `http://localhost:3000/resetPassword/${resetToken}`
     )
     res.status(200).json({ message: 'Sent Email' })
@@ -226,17 +219,13 @@ export const verifyEmail = async (req, res) => {
 }
 
 export const deleteAdmin = async (req, res) => {
-  const {
-    value: { id },
-    joiError,
-  } = DeleteSchema.validate(req.params)
-  if (joiError) return res.status(422).json({ message: joiError.message })
   try {
-    const existingAdmin = await AdminModal.findByIdAndDelete(id)
+    const existingAdmin = await AdminModal.findByIdAndDelete(req.params.id)
     if (!existingAdmin)
       return res.status(404).json({ message: 'Admin doesn\'t exist' })
     // Logout Token
     const token = generateAccessToken({}, '1')
+    res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
     res.status(200).json({ message: 'Admin Deleted Successfully', token })
   } catch (error) {
     res.status(500).json({ message: error.message })

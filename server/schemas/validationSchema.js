@@ -14,3 +14,17 @@ export const LoginSchema = Joi.object({
   password: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
   username: Joi.string().alphanum().min(3).max(30).lowercase().required(),
 })
+
+export const VerifyEmailSchema = Joi.object({
+  token: Joi.string().required()
+})
+
+export const ForgotPasswordSchema = Joi.object({
+  email: Joi.string().email().lowercase().required()
+})
+
+export const ChangePasswordSchema = Joi.object({
+  comfirmPassword: Joi.ref('newPassword'),
+  newPassword: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
+  oldPassword: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required()
+})
