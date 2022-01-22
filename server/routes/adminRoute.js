@@ -4,6 +4,7 @@ import {
   register,
   changePassword,
   logout,
+  logoutAllSessions,
   refresh_token,
   forgotPassword,
   verifyEmail,
@@ -25,6 +26,7 @@ const router = express.Router()
 router.post('/login', validateSchema(LoginSchema), login)
 router.post('/register', validateSchema(RegisterSchema), register)
 router.delete('/logout', logout)
+router.delete('/logoutAllSessions', logoutAllSessions)
 router.post('/refreshToken', refresh_token)
 router.patch(
   '/changePassword',

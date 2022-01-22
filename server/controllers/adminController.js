@@ -52,9 +52,9 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   const {
-    username,
+    email,
     password,
-    email
+    username
   } = req.body
   try {
     const existingAdmin = await AdminModal.findOne({ username })
@@ -71,7 +71,7 @@ export const register = async (req, res) => {
       accessToken,
       refreshToken
     } = generateTokens(
-      existingAdmin._id,
+      newAdmin._id,
       username
     )
     newAdmin.active_tokens.push(refreshToken)
@@ -107,7 +107,7 @@ export const logout = async (req, res) => {
     const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin) {
       res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
-      return res.status(404).json({ message: 'Admin Not Found' })
+      return res.json(Boom.notFound('Admin doesn\'t exist'))
     }
 
     // Remove RefreshToken from active_tokens
@@ -119,6 +119,20 @@ export const logout = async (req, res) => {
     res.status(200).json({ message: 'Logout Successful' })
   } catch (error) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+export const logoutAllSessions = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refresh_token
+    const { id } = decodeRefreshToken(refreshToken)
+    const existingAdmin = await AdminModal.findById(id)
+    existingAdmin.active_tokens = []
+    existingAdmin.save()
+    res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
+    res.status(200).json({message: 'Successfully Ended All Sessions'})
+  } catch (error) {
+    res.json(Boom.notFound(error.message))
   }
 }
 
