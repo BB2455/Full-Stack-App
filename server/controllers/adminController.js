@@ -44,7 +44,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       maxAge: oneWeek,
     })
-    res.status(200).json({ accessToken })
+    res.status(200).json({ accessToken, username })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -94,7 +94,7 @@ export const register = async (req, res) => {
       httpOnly: true,
       maxAge: oneWeek,
     })
-    res.status(201).json({ accessToken })
+    res.status(201).json({ accessToken, username })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

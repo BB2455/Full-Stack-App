@@ -53,9 +53,12 @@ const NavBar = () => {
           <Nav>
             {location.pathname !== "/login" ? (
               currentUser ? (
+                <>
+                <h6 className="mb-0 navbar-brand">{currentUser.username}</h6>
                 <Button variant="secondary" size="sm" onClick={logOut}>
                   Log Out
                 </Button>
+                </>
               ) : (
                 <NavLink to="/login" className="nav-link">
                   Login

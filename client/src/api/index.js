@@ -21,3 +21,4 @@ export const updateUser = (userId, updatedUser) =>
 export const deleteUser = (userId) => API.delete(`/users/id/${userId}`);
 
 export const login = (formData) => API.post(`/admin/login`, formData);
+export const register = (formData) => API.post(`/admin/register`, formData);

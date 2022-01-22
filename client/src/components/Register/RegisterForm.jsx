@@ -13,12 +13,24 @@ const RegisterForm = () => {
   const [formData, setForm] = useState(defaultForm);
   const [error, setError] = useState("");
 
+  const errorHandler = (errorMessage) => {
+    const errorCode = errorMessage.match(/\d+/);
+    switch (errorCode[0]) {
+      case "409":
+        setError("Admin already exists, please try again.");
+        return;
+      default:
+        setError("Something went wrong, please try again later.");
+        return;
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       return setError("Passwords Must Match")
     }
-    dispatch(register(formData, navigate));
+    dispatch(register(formData, navigate, errorHandler));
   };
 
   const handleChange = (e) => {
