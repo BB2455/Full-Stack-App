@@ -93,7 +93,7 @@ const RegisterForm = () => {
       </Form.Group>
       <div className="d-grid">
         <Button variant="outline-primary" type="submit">
-          Login
+          Register
         </Button>
       </div>
     </Form>

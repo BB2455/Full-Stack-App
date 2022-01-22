@@ -1,9 +1,18 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import { NavBar } from "./components";
+import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Container from 'react-bootstrap/Container'
+import { NavBar } from './components'
 
-import { Home, Login, Register, Search, User, NotFoundPage, CreateUser } from "./routes";
+import {
+  Home,
+  Login,
+  Register,
+  ForgotPassword,
+  Search,
+  User,
+  NotFoundPage,
+  CreateUser,
+} from './routes'
 
 const App = () => {
   return (
@@ -14,6 +23,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="search" element={<Search />} />
           <Route path="create" element={<CreateUser />} />
           <Route path="user/:id" element={<User />} />
@@ -21,7 +31,7 @@ const App = () => {
         </Routes>
       </Container>
     </BrowserRouter>
-  );
-};
+  )
+}
 
-export default App;
+export default App

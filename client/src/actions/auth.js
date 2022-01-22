@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { AUTH, LOGOUT, REGISTER } from "../constants/actionTypes";
+import { AUTH, LOGOUT, FORGOT_PASSWORD } from "../constants/actionTypes";
 import * as api from "../api";
 
 export const login = (formData, navigate, errorHandler) => async (dispatch) => {
@@ -34,4 +34,18 @@ export const register = (formData, navigate, errorHandler) => async (dispatch) =
 
 export const logout = () => {
   return { type: LOGOUT };
+};
+
+export const forgotPassword = (formData, errorHandler, setEmailSent) => async (dispatch) => {
+  try {
+    const { data } = await api.forgotPassword(formData);
+    if (data.isBoom) {
+      throw new Error(data.output.statusCode)
+    }
+    dispatch({ type: FORGOT_PASSWORD });
+    setEmailSent(true)
+  } catch (error) {
+    console.error(error.message);
+    errorHandler(error.message);
+  }
 };

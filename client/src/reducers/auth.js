@@ -1,13 +1,12 @@
-import { AUTH, REGISTER, LOGOUT } from "../constants/actionTypes";
+import { AUTH, LOGOUT, FORGOT_PASSWORD } from "../constants/actionTypes";
 
 const reducer = (state = { authData: null }, action) => {
   switch (action.type) {
     case AUTH:
       localStorage.setItem("profile", JSON.stringify({ ...action?.data }));
       return { ...state, authData: action?.data };
-    case REGISTER:
-      localStorage.setItem("profile", JSON.stringify({ ...action?.data }));
-      return
+    case FORGOT_PASSWORD:
+      return {...state}
     case LOGOUT:
       localStorage.removeItem("profile");
       return { ...state, authData: null };

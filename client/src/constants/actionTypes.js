@@ -8,5 +8,5 @@ export const START_LOADING = "START_LOADING";
 export const END_LOADING = "END_LOADING";
 export const ERROR = "ERROR";
 export const AUTH = "AUTH";
-export const REGISTER = "REGISTER"
+export const FORGOT_PASSWORD = "FORGOT_PASSWORD"
 export const LOGOUT = "LOGOUT";
