@@ -1,40 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import { useDispatch } from "react-redux";
-import { login } from "../../actions/auth";
+import { register } from "../../actions/auth";
 import { useNavigate } from "react-router-dom";
 
-const LoginForm = () => {
+const RegisterForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const defaultForm = { username: "", password: "" };
+  const defaultForm = { username: "", email: "", password: "", confirmPassword: "" };
   const [formData, setForm] = useState(defaultForm);
   const [error, setError] = useState("");
 
-  const errorHandler = (errorMessage) => {
-    const errorCode = errorMessage.match(/\d+/);
-    switch (errorCode[0]) {
-      case "404":
-        setError("Admin not found, please try again.");
-        return;
-      case "401":
-        setError(
-          "Your login credentials could not be verified, please try again."
-        );
-        return;
-      default:
-        setError("Something went wrong, please try again later.");
-        return;
-    }
-  };
-
-  useEffect(() => {}, [error]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login(formData, navigate, errorHandler));
+    if (formData.password !== formData.confirmPassword) {
+      return setError("Passwords Must Match")
+    }
+    dispatch(register(formData, navigate));
   };
 
   const handleChange = (e) => {
@@ -43,12 +27,24 @@ const LoginForm = () => {
 
   return (
     <Form onSubmit={handleSubmit}>
-      <Form.Group className="mb-3" controlId="formUserName">
+      <Form.Group className="mb-3" controlId="formUsername">
         <FloatingLabel controlId="floatingUsername" label="Username">
           <Form.Control
             placeholder="Username"
             name="username"
             value={formData.username}
+            onChange={handleChange}
+            required
+          />
+        </FloatingLabel>
+      </Form.Group>
+      <Form.Group className="mb-3" controlId="formEmail">
+        <FloatingLabel controlId="floatingEmail" label="Email">
+          <Form.Control
+            placeholder="Email"
+            type="email"
+            name="email"
+            value={formData.email}
             onChange={handleChange}
             required
           />
@@ -61,6 +57,18 @@ const LoginForm = () => {
             type="password"
             name="password"
             value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </FloatingLabel>
+      </Form.Group>
+      <Form.Group className="mb-3" controlId="formConfirmPassword">
+        <FloatingLabel controlId="floatingConfirmPassword" label="Confirm Password">
+          <Form.Control
+            placeholder="Confirm Password"
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
             onChange={handleChange}
             required
           />
@@ -80,4 +88,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;

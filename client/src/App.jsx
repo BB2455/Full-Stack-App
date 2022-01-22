@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import { NavBar } from "./components";
 
-import { Home, Login, Search, User, NotFoundPage, CreateUser } from "./routes";
+import { Home, Login, Register, Search, User, NotFoundPage, CreateUser } from "./routes";
 
 const App = () => {
   return (
@@ -13,6 +13,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
           <Route path="search" element={<Search />} />
           <Route path="create" element={<CreateUser />} />
           <Route path="user/:id" element={<User />} />
