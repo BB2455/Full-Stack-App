@@ -29,3 +29,12 @@ export const ChangePasswordSchema = Joi.object({
   newPassword: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
   oldPassword: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required()
 })
+
+export const ResetPasswordSchema = Joi.object({
+  confirmPassword: Joi.ref('password'),
+  password: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
+})
+
+export const GetUsersByTokenSchema = Joi.object({
+  token: Joi.string().required(),
+})

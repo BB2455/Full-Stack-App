@@ -9,6 +9,8 @@ import {
   forgotPassword,
   verifyEmail,
   deleteAdmin,
+  resetPassword,
+  getUsersByToken,
 } from '../controllers/adminController.js'
 import {
   LoginSchema,
@@ -17,6 +19,8 @@ import {
   DeleteSchema,
   ForgotPasswordSchema,
   ChangePasswordSchema,
+  ResetPasswordSchema,
+  GetUsersByTokenSchema,
 } from '../schemas/validationSchema.js'
 import authJWT from '../utils/authJWT.js'
 import validateSchema from '../utils/validateSchema.js'
@@ -27,7 +31,18 @@ router.post('/login', validateSchema(LoginSchema), login)
 router.post('/register', validateSchema(RegisterSchema), register)
 router.delete('/logout', logout)
 router.delete('/logoutAllSessions', logoutAllSessions)
+router.get(
+  '/getUsersByToken/:token',
+  validateSchema(GetUsersByTokenSchema, 'params'),
+  getUsersByToken
+)
 router.post('/refreshToken', refresh_token)
+router.patch(
+  '/resetPassword',
+  validateSchema(ResetPasswordSchema),
+  resetPassword
+)
+router.put('/resetPassword', validateSchema(ResetPasswordSchema), resetPassword)
 router.patch(
   '/changePassword',
   authJWT,

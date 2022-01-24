@@ -1,6 +1,8 @@
+import crypto from 'crypto'
 import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import AdminModal from '../models/admin.js'
+import ResetToken from '../models/resetToken.js'
 import decodeAccessToken from '../utils/decodeAccessToken.js'
 import decodeRefreshToken from '../utils/decodeRefreshToken.js'
 import {
@@ -70,10 +72,7 @@ export const register = async (req, res) => {
     const {
       accessToken,
       refreshToken
-    } = generateTokens(
-      newAdmin._id,
-      username
-    )
+    } = generateTokens(newAdmin._id, username)
     newAdmin.active_tokens.push(refreshToken)
     await newAdmin.save()
     // Send Verification Email
@@ -130,7 +129,7 @@ export const logoutAllSessions = async (req, res) => {
     existingAdmin.active_tokens = []
     existingAdmin.save()
     res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
-    res.status(200).json({message: 'Successfully Ended All Sessions'})
+    res.status(200).json({ message: 'Successfully Ended All Sessions' })
   } catch (error) {
     res.json(Boom.notFound(error.message))
   }
@@ -196,23 +195,78 @@ export const refresh_token = async (req, res) => {
   }
 }
 
+export const getUsersByToken = async (req, res) => {
+  const {
+    token
+  } = req.params
+  try {
+    const resetToken = await ResetToken.findOne({reset_token: token})
+    if (!resetToken) return res.json(Boom.unauthorized('Expired Or Invalid Token'))
+    const users = await AdminModal.find({
+      $and: [
+        {email: resetToken.email},
+        {verified_email: true}
+      ]})
+    const filteredUsers = users.map((user) => {
+      return {
+        id: user._id,
+        usename: user.username
+      }
+    })
+    res.status(200).json(filteredUsers)
+  } catch (error) {
+    res.json(Boom.badImplementation(error.message))
+  }
+}
+
 export const forgotPassword = async (req, res) => {
   const { email } = req.body
   try {
-    const existingAdmin = await AdminModal.findOne({ email })
+    const existingAdmin = await AdminModal.findOne({
+      $and: [
+        { email },
+        { verified_email: true}
+      ],
+    })
     if (!existingAdmin)
-      return res.status(404).json({ message: 'Admin doesn\'t exist' })
-    const resetToken = generateAccessToken(
-      { id: existingAdmin._id, username: existingAdmin.username },
-      '30m'
-    )
-    handleForgotPasswordEmail(
-      email,
-      `http://localhost:3000/resetPassword/${resetToken}`
-    )
+      return res.json(Boom.notFound('Admin doesn\'t exist'))
+    let resetToken = await ResetToken.findOne({ email })
+    if (!resetToken) {
+      resetToken = await new ResetToken({
+        email,
+        reset_token: crypto.randomBytes(32).toString('hex'),
+      }).save()
+    }
+
+    // handleForgotPasswordEmail(
+    //   email,
+    //   `http://localhost:3000/reset-password?&token=${resetToken.reset_token}`
+    // )
     res.status(200).json({ message: 'Sent Email' })
   } catch (error) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+export const resetPassword = async (req, res) => {
+  const { password } = req.body
+  const {
+    token,
+    uid
+  } = req.query
+  try {
+    const existingAdmin = await AdminModal.findById(uid)
+    const existingToken = await ResetToken.findOne({ reset_token: token })
+    if (!existingAdmin || !existingToken) return res.json(Boom.unauthorized())
+    const isOldPassword = await bcrypt.compare(password, existingAdmin.password)
+    if (isOldPassword) return res.json(Boom.conflict('Cannot use old password'))
+    const hashedPassword = await bcrypt.hash(password, 12)
+    existingAdmin.password = hashedPassword
+    await existingAdmin.save()
+    await existingToken.delete()
+    res.status(200).json({ message: 'Password Successfully Updated' })
+  } catch (error) {
+    res.json(Boom.badImplementation(error.message))
   }
 }
 
