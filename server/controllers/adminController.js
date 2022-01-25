@@ -210,7 +210,7 @@ export const getUsersByToken = async (req, res) => {
     const filteredUsers = users.map((user) => {
       return {
         id: user._id,
-        usename: user.username
+        username: user.username
       }
     })
     res.status(200).json(filteredUsers)
@@ -238,10 +238,10 @@ export const forgotPassword = async (req, res) => {
       }).save()
     }
 
-    // handleForgotPasswordEmail(
-    //   email,
-    //   `http://localhost:3000/reset-password?&token=${resetToken.reset_token}`
-    // )
+    handleForgotPasswordEmail(
+      email,
+      `http://localhost:3000/reset-password?token=${resetToken.reset_token}`
+    )
     res.status(200).json({ message: 'Sent Email' })
   } catch (error) {
     res.status(500).json({ message: error.message })
