@@ -1,36 +1,37 @@
-import React, { useState, useEffect, useCallback } from "react";
-import Navbar from "react-bootstrap/Navbar";
-import Nav from "react-bootstrap/Nav";
-import Container from "react-bootstrap/Container";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import { useDispatch } from "react-redux";
-import { logout } from "../actions/auth";
-import decode from "jwt-decode";
+import React, { useState, useEffect, useCallback } from 'react'
+import Navbar from 'react-bootstrap/Navbar'
+import Nav from 'react-bootstrap/Nav'
+import Container from 'react-bootstrap/Container'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import Button from 'react-bootstrap/Button'
+import { useDispatch } from 'react-redux'
+import { logout } from '../actions/auth'
+import decode from 'jwt-decode'
 
 const NavBar = () => {
   const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("profile"))
-  );
-  const dispatch = useDispatch();
-  const location = useLocation();
-  const navigate = useNavigate();
+    JSON.parse(localStorage.getItem('profile'))
+  )
+  const dispatch = useDispatch()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const logOut = useCallback(() => {
-    dispatch(logout());
-    setCurrentUser(null);
-    navigate("/login", { replace: true });
-  }, [dispatch, navigate]);
+    dispatch(logout()).then(() => {
+      setCurrentUser(null)
+      navigate('/login', { replace: true })
+    })
+  }, [dispatch, navigate])
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem("profile"))?.token;
+    const token = JSON.parse(localStorage.getItem('profile'))?.token
 
     if (token) {
-      const decodedToken = decode(token);
-      if (decodedToken.exp * 1000 < new Date().getTime()) logOut();
+      const decodedToken = decode(token)
+      if (decodedToken.exp * 1000 < new Date().getTime()) logOut()
     }
-    setCurrentUser(JSON.parse(localStorage.getItem("profile")));
-  }, [location, logOut]);
+    setCurrentUser(JSON.parse(localStorage.getItem('profile')))
+  }, [location, logOut])
 
   return (
     <Navbar bg="light" variant="light" expand="sm">
@@ -51,13 +52,13 @@ const NavBar = () => {
             )}
           </Nav>
           <Nav>
-            {location.pathname !== "/login" ? (
+            {location.pathname !== '/login' ? (
               currentUser ? (
                 <>
-                <h6 className="mb-0 navbar-brand">{currentUser.username}</h6>
-                <Button variant="secondary" size="sm" onClick={logOut}>
-                  Log Out
-                </Button>
+                  <h6 className="mb-0 navbar-brand">{currentUser.username}</h6>
+                  <Button variant="secondary" size="sm" onClick={logOut}>
+                    Log Out
+                  </Button>
                 </>
               ) : (
                 <NavLink to="/login" className="nav-link">
@@ -69,7 +70,7 @@ const NavBar = () => {
         </Navbar.Collapse>
       </Container>
     </Navbar>
-  );
-};
+  )
+}
 
-export default NavBar;
+export default NavBar

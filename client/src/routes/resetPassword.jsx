@@ -75,8 +75,9 @@ const ResetPassword = () => {
               {success ? (
                 <>
                   <h4>Password Reset.</h4>
+                  <h6>Please login with your new password.</h6>
                   <h6>
-                    Please login with your new password.
+                    <Link to="/login">Login</Link>
                   </h6>
                 </>
               ) : (
