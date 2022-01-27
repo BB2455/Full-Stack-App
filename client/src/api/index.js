@@ -23,3 +23,5 @@ export const deleteUser = (userId) => API.delete(`/users/id/${userId}`);
 export const login = (formData) => API.post(`/admin/login`, formData);
 export const register = (formData) => API.post(`/admin/register`, formData);
 export const forgotPassword = (formData) => API.post(`/admin/forgotPassword`, formData);
+export const resetPassword = (formData, token, uid) => API.patch(`/admin/resetPassword?token=${token}&uid=${uid}`, formData);
+export const getUsersByToken = (token) => API.get(`admin/getUsersByToken/${token}`)

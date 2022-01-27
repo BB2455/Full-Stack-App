@@ -8,6 +8,7 @@ import {
   Login,
   Register,
   ForgotPassword,
+  ResetPassword,
   Search,
   User,
   NotFoundPage,
@@ -24,6 +25,7 @@ const App = () => {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
           <Route path="search" element={<Search />} />
           <Route path="create" element={<CreateUser />} />
           <Route path="user/:id" element={<User />} />

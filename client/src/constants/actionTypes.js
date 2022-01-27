@@ -10,3 +10,4 @@ export const ERROR = "ERROR";
 export const AUTH = "AUTH";
 export const FORGOT_PASSWORD = "FORGOT_PASSWORD"
 export const LOGOUT = "LOGOUT";
+export const GET_USERS_BY_TOKEN = "GET_USERS_BY_TOKEN"

@@ -1,4 +1,3 @@
-// eslint-disable-next-line
 import { AUTH, LOGOUT, FORGOT_PASSWORD } from "../constants/actionTypes";
 import * as api from "../api";
 
