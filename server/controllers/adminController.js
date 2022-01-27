@@ -207,6 +207,7 @@ export const getUsersByToken = async (req, res) => {
         {email: resetToken.email},
         {verified_email: true}
       ]})
+    if (users.length === 0) return res.json(Boom.notFound('No Admins Linked To Email'))
     const filteredUsers = users.map((user) => {
       return {
         id: user._id,
@@ -258,6 +259,7 @@ export const resetPassword = async (req, res) => {
     const existingAdmin = await AdminModal.findById(uid)
     const existingToken = await ResetToken.findOne({ reset_token: token })
     if (!existingAdmin || !existingToken) return res.json(Boom.unauthorized())
+    if (existingAdmin.email !== existingToken.email) return res.json(Boom.unauthorized())
     const isOldPassword = await bcrypt.compare(password, existingAdmin.password)
     if (isOldPassword) return res.json(Boom.conflict('Cannot use old password'))
     const hashedPassword = await bcrypt.hash(password, 12)
