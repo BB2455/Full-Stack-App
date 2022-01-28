@@ -5,6 +5,8 @@ import Col from 'react-bootstrap/Col'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import Spinner from 'react-bootstrap/Spinner'
 import { getUsersByToken } from '../api'
+import Card from 'react-bootstrap/Card'
+import Button from 'react-bootstrap/Button'
 
 const ResetPassword = () => {
   const navigate = useNavigate()
@@ -110,13 +112,14 @@ const ResetPassword = () => {
               {users && (
                 <>
                   {users.map((user) => (
-                    <h2
-                      className="mb-4"
-                      key={user.id}
-                      onClick={() => selectUser(user)}
-                    >
-                      {user.username}
-                    </h2>
+                    <Card className="mb-3" key={user.id}>
+                      <Card.Body>
+                        <Card.Title className="d-flex justify-content-between align-items-center mb-0">
+                          {user.username}
+                          <Button onClick={() => selectUser(user)}>Select</Button>
+                        </Card.Title>
+                      </Card.Body>
+                    </Card>
                   ))}
                 </>
               )}
