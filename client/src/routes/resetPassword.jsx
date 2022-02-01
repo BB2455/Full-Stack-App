@@ -116,7 +116,9 @@ const ResetPassword = () => {
                       <Card.Body>
                         <Card.Title className="d-flex justify-content-between align-items-center mb-0">
                           {user.username}
-                          <Button onClick={() => selectUser(user)}>Select</Button>
+                          <Button onClick={() => selectUser(user)}>
+                            Select
+                          </Button>
                         </Card.Title>
                       </Card.Body>
                     </Card>

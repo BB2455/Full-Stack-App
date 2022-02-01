@@ -9,6 +9,7 @@ import {
   Register,
   ForgotPassword,
   ResetPassword,
+  Settings,
   Search,
   User,
   NotFoundPage,
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="/profile/settings" element={<Settings />} />
           <Route path="search" element={<Search />} />
           <Route path="create" element={<CreateUser />} />
           <Route path="user/:id" element={<User />} />
