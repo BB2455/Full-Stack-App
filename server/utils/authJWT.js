@@ -1,3 +1,4 @@
+import Boom from '@hapi/boom'
 import decodeAccessToken from './decodeAccessToken.js'
 
 const authJWT = async (req, res, next) => {
@@ -7,12 +8,13 @@ const authJWT = async (req, res, next) => {
 
     if (token) {
       const decodedData = decodeAccessToken(token)
+      if (decodedData.expired) throw new Error('Expired Token')
       req.userID = decodedData?.id
     }
 
     next()
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.json(Boom.unauthorized(error.message))
   }
 }
 
