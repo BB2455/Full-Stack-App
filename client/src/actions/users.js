@@ -20,6 +20,10 @@ export const getUsers = (page) => async (dispatch) => {
       data: { data, currentPage, numberOfPages, results },
     } = await api.fetchUsers(page);
 
+    if (data.isBoom) {
+      throw new Error(data.output.statusCode)
+    }
+
     dispatch({
       type: FETCH_ALL,
       payload: { data, currentPage, numberOfPages, results },
@@ -44,6 +48,9 @@ export const getUser = (id) => async (dispatch) => {
   try {
     dispatch({ type: START_LOADING });
     const { data } = await api.fetchUser(id);
+    if (data.isBoom) {
+      throw new Error(data.output.statusCode)
+    }
     dispatch({ type: FETCH, payload: data });
     dispatch({ type: END_LOADING });
   } catch (error) {
@@ -66,7 +73,9 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
     const {
       data: { data, currentPage, numberOfPages, results },
     } = await api.fetchPostsBySearch(searchQuery);
-
+    if (data.isBoom) {
+      throw new Error(data.output.statusCode)
+    }
     dispatch({
       type: FETCH_BY_SEARCH,
       payload: { data, currentPage, numberOfPages, results },
@@ -92,6 +101,9 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
 export const createUser = (newUser, handleRes) => async (dispatch) => {
   try {
     const { data } = await api.createUser(newUser);
+    if (data.isBoom) {
+      throw new Error(data.output.statusCode)
+    }
     dispatch({ type: CREATE, payload: data });
     handleRes({ message: "User has been created!", error: false });
   } catch (error) {
@@ -106,6 +118,9 @@ export const createUser = (newUser, handleRes) => async (dispatch) => {
 export const updateUser = (userId, userData, handleRes) => async (dispatch) => {
   try {
     const { data } = await api.updateUser(userId, userData);
+    if (data.isBoom) {
+      throw new Error(data.output.statusCode)
+    }
     dispatch({ type: UPDATE, payload: data });
   } catch (error) {
     handleRes({

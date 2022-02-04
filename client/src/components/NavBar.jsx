@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import Container from 'react-bootstrap/Container'
@@ -16,22 +16,22 @@ const NavBar = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const logOut = useCallback(() => {
+  const logOut = () => {
     dispatch(logout()).then(() => {
       setCurrentUser(null)
       navigate('/login', { replace: true })
     })
-  }, [dispatch, navigate])
+  }
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem('profile'))?.token
+    const token = JSON.parse(localStorage.getItem('profile'))?.accessToken
 
     if (token) {
       const decodedToken = decode(token)
-      if (decodedToken.exp * 1000 < new Date().getTime()) logOut()
+      if (decodedToken.exp * 1000 < new Date().getTime()) {}
     }
     setCurrentUser(JSON.parse(localStorage.getItem('profile')))
-  }, [location, logOut])
+  }, [location])
 
   return (
     <Navbar bg="light" variant="light" expand="sm">

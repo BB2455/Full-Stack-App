@@ -8,7 +8,7 @@ const API = axios.create({
 API.interceptors.request.use((req) => {
   if (localStorage.getItem('profile')) {
     req.headers.Authorization = `Bearer ${
-      JSON.parse(localStorage.getItem('profile')).token
+      JSON.parse(localStorage.getItem('profile')).accessToken
     }`
   }
   return req
@@ -32,3 +32,4 @@ export const resetPassword = (formData, token, uid) =>
 export const getUsersByToken = (token) =>
   API.get(`admin/getUsersByToken/${token}`)
 export const logout = () => API.delete(`/admin/logout`)
+export const changePassword = (formData) => API.patch(`/admin/changePassword`, formData)
