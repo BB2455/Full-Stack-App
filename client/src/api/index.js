@@ -34,3 +34,4 @@ export const getUsersByToken = (token) =>
 export const logout = () => API.delete(`/admin/logout`)
 export const changePassword = (formData) => API.patch(`/admin/changePassword`, formData)
 export const logoutAllSessions = () => API.delete(`/admin/logoutAllSessions`)
+export const deleteAccount = (userId) => API.delete(`/admin/id/${userId}`)

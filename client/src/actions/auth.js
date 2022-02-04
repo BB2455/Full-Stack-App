@@ -61,7 +61,17 @@ export const forgotPassword =
 
 export const logoutAllSessions = () => async (dispatch) => {
   try {
-    const {data} = await api.logoutAllSessions()
+    const { data } = await api.logoutAllSessions()
+    if (data.isBoom) throw new Error(data.output.statusCode)
+    dispatch({ type: LOGOUT })
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+export const deleteAccount = (userId) => async (dispatch) => {
+  try {
+    const { data } = await api.deleteAccount(userId)
     if (data.isBoom) throw new Error(data.output.statusCode)
     dispatch({ type: LOGOUT })
   } catch (error) {

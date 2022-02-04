@@ -1,12 +1,25 @@
 import React, { useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { deleteAccount } from '../../actions/auth'
+import decode from 'jwt-decode'
 
 const DeleteAccountModal = () => {
   const [show, setShow] = useState(false)
-
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const handleShow = () => setShow(true)
   const handleClose = () => setShow(false)
+
+  const onDeleteAccount = async () => {
+    const userId = decode(
+      JSON.parse(localStorage.getItem('profile'))?.accessToken
+    )?.id
+    await dispatch(deleteAccount(userId))
+    navigate('/')
+  }
 
   return (
     <>
@@ -39,7 +52,9 @@ const DeleteAccountModal = () => {
           <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant="danger">DELETE ACCOUNT</Button>
+          <Button variant="danger" onClick={onDeleteAccount}>
+            DELETE ACCOUNT
+          </Button>
         </Modal.Footer>
       </Modal>
     </>
