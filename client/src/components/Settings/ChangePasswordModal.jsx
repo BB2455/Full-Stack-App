@@ -36,7 +36,10 @@ const ChangePasswordModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (formData.currentPassword === formData.newPassword || formData.currentPassword === formData.confirmPassword) {
+    if (
+      formData.currentPassword === formData.newPassword ||
+      formData.currentPassword === formData.confirmPassword
+    ) {
       return setError('New Password Cannot Be Current Password')
     }
     if (formData.newPassword !== formData.confirmPassword) {

@@ -58,3 +58,13 @@ export const forgotPassword =
       errorHandler(error.message)
     }
   }
+
+export const logoutAllSessions = () => async (dispatch) => {
+  try {
+    const {data} = await api.logoutAllSessions()
+    if (data.isBoom) throw new Error(data.output.statusCode)
+    dispatch({ type: LOGOUT })
+  } catch (error) {
+    console.log(error.message)
+  }
+}

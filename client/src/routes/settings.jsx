@@ -10,7 +10,7 @@ const Settings = () => {
   const navigate = useNavigate()
   const profile = localStorage.getItem('profile')
   useEffect(() => {
-    if (!profile) navigate('/', { replace: true })
+    if (!profile) navigate('/login', { replace: true })
   }, [navigate, profile])
   return (
     <div>

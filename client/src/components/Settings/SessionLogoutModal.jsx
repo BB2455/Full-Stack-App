@@ -1,12 +1,21 @@
 import React, { useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
+import { useDispatch } from 'react-redux'
+import { logoutAllSessions } from '../../actions/auth'
+import { useNavigate } from 'react-router-dom'
 
 const SessionLogoutModal = () => {
   const [show, setShow] = useState(false)
-
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const handleShow = () => setShow(true)
   const handleClose = () => setShow(false)
+
+  const logoutSessions = async () => {
+    await dispatch(logoutAllSessions())
+    navigate('/login')
+  }
 
   return (
     <>
@@ -41,7 +50,9 @@ const SessionLogoutModal = () => {
           <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant="warning">Logout Sessions</Button>
+          <Button variant="warning" onClick={logoutSessions}>
+            Logout Sessions
+          </Button>
         </Modal.Footer>
       </Modal>
     </>

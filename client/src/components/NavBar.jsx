@@ -19,7 +19,7 @@ const NavBar = () => {
   const logOut = () => {
     dispatch(logout()).then(() => {
       setCurrentUser(null)
-      navigate('/login', { replace: true })
+      navigate('/login')
     })
   }
 
