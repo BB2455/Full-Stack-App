@@ -8,7 +8,7 @@ const authJWT = async (req, res, next) => {
 
     if (token) {
       const decodedData = decodeAccessToken(token)
-      if (decodedData.expired) throw new Error('Expired Token')
+      if (decodedData.expired) throw new Error('Invalid Or Expired Token')
       req.userID = decodedData?.id
     }
 

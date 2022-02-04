@@ -137,24 +137,21 @@ export const logoutAllSessions = async (req, res) => {
 
 export const changePassword = async (req, res) => {
   const {
-    oldPassword,
+    currentPassword,
     newPassword
   } = req.body
   try {
     // Get Existing Admin
     const existingAdmin = await AdminModal.findById(req.userID)
-    if (!existingAdmin)
-      return res.status(404).json({ message: 'Admin doesn\'t exist' })
     // Check If Correct Password
     const isPasswordCorrect = await bcrypt.compare(
-      oldPassword,
+      currentPassword,
       existingAdmin.password
     )
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: 'Invalid credentials' })
+      return res.json(Boom.badRequest('Invalid credentials'))
     // Set New Password
-    const hashedPassword = await bcrypt.hash(newPassword, 12)
-    existingAdmin.password = hashedPassword
+    existingAdmin.password = await bcrypt.hash(newPassword, 12)
     await existingAdmin.save()
     res.status(200).json({ message: 'Password Changed Successfully' })
   } catch (error) {
@@ -294,9 +291,8 @@ export const deleteAdmin = async (req, res) => {
     if (!existingAdmin)
       return res.status(404).json({ message: 'Admin doesn\'t exist' })
     // Logout Token
-    const token = generateAccessToken({}, '1')
     res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
-    res.status(200).json({ message: 'Admin Deleted Successfully', token })
+    res.status(200).json({ message: 'Admin Deleted Successfully' })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
