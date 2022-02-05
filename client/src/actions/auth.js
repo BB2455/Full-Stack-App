@@ -78,3 +78,15 @@ export const deleteAccount = (userId) => async (dispatch) => {
     console.log(error.message)
   }
 }
+
+export const getRefreshToken = () => async (dispatch) => {
+  try {
+    const { data } = await api.refreshToken()
+    if (data.isBoom) {
+      throw new Error(data.output.statusCode)
+    }
+    dispatch({ type: AUTH, data })
+  } catch (error) {
+    console.error(error.message)
+  }
+}

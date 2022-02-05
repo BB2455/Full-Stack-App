@@ -5,7 +5,7 @@ import Container from 'react-bootstrap/Container'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { logout } from '../actions/auth'
+import { logout, getRefreshToken } from '../actions/auth'
 import decode from 'jwt-decode'
 import { PersonCircle } from 'react-bootstrap-icons'
 
@@ -29,10 +29,12 @@ const NavBar = () => {
 
     if (token) {
       const decodedToken = decode(token)
-      if (decodedToken.exp * 1000 < new Date().getTime()) {}
+      if (decodedToken.exp * 1000 - 60000 < new Date().getTime()) {
+        dispatch(getRefreshToken())
+      }
     }
     setCurrentUser(JSON.parse(localStorage.getItem('profile')))
-  }, [location])
+  }, [location, dispatch])
 
   return (
     <Navbar bg="light" variant="light" expand="sm">
@@ -62,7 +64,7 @@ const NavBar = () => {
                     align="end"
                   >
                     <NavDropdown.Header>
-                      {currentUser.username}
+                      {decode(currentUser?.accessToken)?.username}
                     </NavDropdown.Header>
                     <NavDropdown.Divider />
                     <Link className="dropdown-item" to="/profile/settings">
