@@ -36,7 +36,7 @@ router.get(
   validateSchema(GetUsersByTokenSchema, 'params'),
   getUsersByToken
 )
-router.post('/refreshToken', refresh_token)
+router.get('/refreshToken', refresh_token)
 router.patch(
   '/resetPassword',
   validateSchema(ResetPasswordSchema),

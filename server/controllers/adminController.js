@@ -46,7 +46,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       maxAge: oneWeek,
     })
-    res.status(200).json({ accessToken, username })
+    res.status(200).json({ accessToken })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -93,7 +93,7 @@ export const register = async (req, res) => {
       httpOnly: true,
       maxAge: oneWeek,
     })
-    res.status(201).json({ accessToken, username })
+    res.status(201).json({ accessToken })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -161,34 +161,26 @@ export const changePassword = async (req, res) => {
 
 export const refresh_token = async (req, res) => {
   const refreshToken = req.cookies?.refresh_token
-  let token
   try {
-    if (refreshToken) {
-      const {
-        expired,
-        id,
-        username
-      } = decodeRefreshToken(refreshToken)
-      if (expired) return res.status(200).json(generateAccessToken({}, '1'))
-      const existingAdmin = await AdminModal.findById(id)
-      if (!existingAdmin)
-        return res.status(404).json({ message: 'Admin doesn\'t exist' })
-      const active_token = existingAdmin.active_tokens.find(
-        (existingtoken) => existingtoken === refreshToken
-      )
-      if (active_token) {
-        token = generateAccessToken({ id, username })
-      } else {
-        token = generateAccessToken({}, '1')
-      }
+    if (!refreshToken) throw new Error('Invalid Or Expired Token')
+    const {
+      expired,
+      id,
+      username
+    } = decodeRefreshToken(refreshToken)
+    if (expired) throw new Error('Invalid Or Expired Token')
+    const existingAdmin = await AdminModal.findById(id)
+    if (!existingAdmin)
+      return res.json(Boom.notFound('Admin doesn\'t exist'))
+    const active_token = existingAdmin.active_tokens.find(
+      (existingtoken) => existingtoken === refreshToken
+    )
+    if (!active_token) throw new Error('Invalid Or Expired Token')
+    const accessToken = generateAccessToken({ id, username })
 
-      res.status(200).json(token)
-    } else {
-      token = generateAccessToken({}, '1')
-      return res.status(200).json(token)
-    }
+    res.status(200).json({ accessToken })
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.json(Boom.badRequest(error.message))
   }
 }
 
