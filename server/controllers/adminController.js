@@ -35,8 +35,7 @@ export const login = async (req, res) => {
       accessToken,
       refreshToken
     } = generateTokens(
-      existingAdmin._id,
-      username
+      existingAdmin
     )
     existingAdmin.active_tokens.push(refreshToken)
     await existingAdmin.save()
@@ -72,7 +71,7 @@ export const register = async (req, res) => {
     const {
       accessToken,
       refreshToken
-    } = generateTokens(newAdmin._id, username)
+    } = generateTokens(newAdmin)
     newAdmin.active_tokens.push(refreshToken)
     await newAdmin.save()
     // Send Verification Email
