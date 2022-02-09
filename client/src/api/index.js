@@ -14,6 +14,22 @@ API.interceptors.request.use((req) => {
   return req
 })
 
+API.interceptors.response.use(async (res) => {
+  const { data, config } = res
+  if (config.url === '/admin/refreshToken') return res
+  if (data.isBoom && data.output.statusCode === 401 && !config._retry) {
+    config._retry = true
+    try {
+      const {data: {accessToken}} = await API.get(`/admin/refreshToken`)
+      localStorage.setItem("profile", JSON.stringify({accessToken}));
+      return API(config)
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+  return res
+})
+
 export const fetchUsers = (page) => API.get(`/users/${page}`)
 export const fetchUser = (userId) => API.get(`/users/id/${userId}`)
 export const fetchPostsBySearch = (searchQuery) =>

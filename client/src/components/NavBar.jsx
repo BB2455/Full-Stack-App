@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux'
 import { logout, getRefreshToken } from '../actions/auth'
 import decode from 'jwt-decode'
 import { PersonCircle } from 'react-bootstrap-icons'
+import { getDecodedToken } from '../utils/getDecodedToken'
 
 const NavBar = () => {
   const [currentUser, setCurrentUser] = useState(
@@ -64,7 +65,7 @@ const NavBar = () => {
                     align="end"
                   >
                     <NavDropdown.Header>
-                      {decode(currentUser?.accessToken)?.username}
+                      {getDecodedToken(currentUser?.accessToken)?.username}
                     </NavDropdown.Header>
                     <NavDropdown.Divider />
                     <Link className="dropdown-item" to="/profile/settings">

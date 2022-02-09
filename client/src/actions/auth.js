@@ -40,6 +40,7 @@ export const logout = () => async (dispatch) => {
     }
     dispatch({ type: LOGOUT })
   } catch (error) {
+    dispatch({ type: LOGOUT })
     console.error(error.message)
   }
 }
@@ -85,8 +86,10 @@ export const getRefreshToken = () => async (dispatch) => {
     if (data.isBoom) {
       throw new Error(data.output.statusCode)
     }
+    console.log('running')
     dispatch({ type: AUTH, data })
   } catch (error) {
-    console.error(error.message)
+    console.log(error.message)
+    dispatch({type: LOGOUT})
   }
 }
