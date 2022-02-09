@@ -86,7 +86,6 @@ export const getRefreshToken = () => async (dispatch) => {
     if (data.isBoom) {
       throw new Error(data.output.statusCode)
     }
-    console.log('running')
     dispatch({ type: AUTH, data })
   } catch (error) {
     console.log(error.message)

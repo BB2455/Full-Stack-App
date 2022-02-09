@@ -20,8 +20,10 @@ API.interceptors.response.use(async (res) => {
   if (data.isBoom && data.output.statusCode === 401 && !config._retry) {
     config._retry = true
     try {
-      const {data: {accessToken}} = await API.get(`/admin/refreshToken`)
-      localStorage.setItem("profile", JSON.stringify({accessToken}));
+      const {
+        data: { accessToken },
+      } = await API.get(`/admin/refreshToken`)
+      localStorage.setItem('profile', JSON.stringify({ accessToken }))
       return API(config)
     } catch (error) {
       return Promise.reject(error)
@@ -48,7 +50,9 @@ export const resetPassword = (formData, token, uid) =>
 export const getUsersByToken = (token) =>
   API.get(`admin/getUsersByToken/${token}`)
 export const logout = () => API.delete(`/admin/logout`)
-export const changePassword = (formData) => API.patch(`/admin/changePassword`, formData)
+export const changePassword = (formData) =>
+  API.patch(`/admin/changePassword`, formData)
 export const logoutAllSessions = () => API.delete(`/admin/logoutAllSessions`)
 export const deleteAccount = (userId) => API.delete(`/admin/id/${userId}`)
 export const refreshToken = () => API.get(`/admin/refreshToken`)
+export const verifyEmail = (token) => API.patch(`admin/verifyEmail/${token}`)

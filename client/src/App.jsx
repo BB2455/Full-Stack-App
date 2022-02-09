@@ -14,6 +14,7 @@ import {
   User,
   NotFoundPage,
   CreateUser,
+  Verify,
 } from './routes'
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="verify/:token" element={<Verify />} />
           <Route path="/profile/settings" element={<Settings />} />
           <Route path="search" element={<Search />} />
           <Route path="create" element={<CreateUser />} />
