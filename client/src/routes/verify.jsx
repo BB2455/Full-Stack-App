@@ -15,7 +15,11 @@ const Verify = () => {
   const VerifyEmail = async () => {
     try {
       const { data } = await verifyEmail(token)
-      console.log(data)
+      if (
+        data.isBoom &&
+        data.output.payload.message !== 'Email already verified'
+      )
+        throw new Error(data.output.payload.message)
       setMessage('SUCCESS')
     } catch (error) {
       setMessage('FAILURE')
