@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import SessionLogoutModal from '../components/Settings/SessionLogoutModal'
 import DeleteAccountModal from '../components/Settings/DeleteAccountModal'
 import ChangePasswordModal from '../components/Settings/ChangePasswordModal'
+import VerifyEmail from '../components/Settings/VerifyEmail'
+import { getDecodedToken } from '../utils/getDecodedToken'
 
 const Settings = () => {
   const navigate = useNavigate()
@@ -12,26 +14,26 @@ const Settings = () => {
   useEffect(() => {
     if (!profile) navigate('/login', { replace: true })
   }, [navigate, profile])
+  const user = getDecodedToken(JSON.parse(profile)?.accessToken)
   return (
     <div>
       <Row className="justify-content-center">
         <Col lg={4} md={6} sm={7}>
           <h1 className="mb-5">Settings</h1>
+          {user?.verified_email ? (
+            <>{/* Change Email Modal */}</>
+          ) : (
+            <VerifyEmail />
+          )}
           <h4>Change Password</h4>
-          <h6>
-            Change your current password.
-          </h6>
+          <h6>Change your current password.</h6>
           <ChangePasswordModal />
           <h4>Logout All Sessions</h4>
-          <h6>
-            Logout all sessions. Will logout current session.
-          </h6>
+          <h6>Logout all sessions. Will logout current session.</h6>
           <SessionLogoutModal />
           <h4>Delete Account</h4>
-          <h6>
-            Delete account. Cannot be undone.
-          </h6>
-            <DeleteAccountModal />
+          <h6>Delete account. Cannot be undone.</h6>
+          <DeleteAccountModal />
         </Col>
       </Row>
     </div>
