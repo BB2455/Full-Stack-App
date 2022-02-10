@@ -34,9 +34,7 @@ export const login = async (req, res) => {
     const {
       accessToken,
       refreshToken
-    } = generateTokens(
-      existingAdmin
-    )
+    } = generateTokens(existingAdmin)
     existingAdmin.active_tokens.push(refreshToken)
     await existingAdmin.save()
     // One Week Time
@@ -164,18 +162,16 @@ export const refresh_token = async (req, res) => {
     if (!refreshToken) throw new Error('Invalid Or Expired Token')
     const {
       expired,
-      id,
-      username
+      id
     } = decodeRefreshToken(refreshToken)
     if (expired) throw new Error('Invalid Or Expired Token')
     const existingAdmin = await AdminModal.findById(id)
-    if (!existingAdmin)
-      return res.json(Boom.notFound('Admin doesn\'t exist'))
+    if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
     const active_token = existingAdmin.active_tokens.find(
       (existingtoken) => existingtoken === refreshToken
     )
     if (!active_token) throw new Error('Invalid Or Expired Token')
-    const accessToken = generateAccessToken({ id, username })
+    const { accessToken } = generateTokens(existingAdmin)
 
     res.status(200).json({ accessToken })
   } catch (error) {
@@ -184,22 +180,23 @@ export const refresh_token = async (req, res) => {
 }
 
 export const getUsersByToken = async (req, res) => {
-  const {
-    token
-  } = req.params
+  const { token } = req.params
   try {
-    const resetToken = await ResetToken.findOne({reset_token: token})
-    if (!resetToken) return res.json(Boom.unauthorized('Expired Or Invalid Token'))
+    const resetToken = await ResetToken.findOne({ reset_token: token })
+    if (!resetToken)
+      return res.json(Boom.unauthorized('Expired Or Invalid Token'))
     const users = await AdminModal.find({
       $and: [
-        {email: resetToken.email},
-        {verified_email: true}
-      ]})
-    if (users.length === 0) return res.json(Boom.notFound('No Admins Linked To Email'))
+        { email: resetToken.email },
+        { verified_email: true }
+      ],
+    })
+    if (users.length === 0)
+      return res.json(Boom.notFound('No Admins Linked To Email'))
     const filteredUsers = users.map((user) => {
       return {
         id: user._id,
-        username: user.username
+        username: user.username,
       }
     })
     res.status(200).json(filteredUsers)
@@ -214,11 +211,10 @@ export const forgotPassword = async (req, res) => {
     const existingAdmin = await AdminModal.findOne({
       $and: [
         { email },
-        { verified_email: true}
+        { verified_email: true }
       ],
     })
-    if (!existingAdmin)
-      return res.json(Boom.notFound('Admin doesn\'t exist'))
+    if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
     let resetToken = await ResetToken.findOne({ email })
     if (!resetToken) {
       resetToken = await new ResetToken({
@@ -247,7 +243,8 @@ export const resetPassword = async (req, res) => {
     const existingAdmin = await AdminModal.findById(uid)
     const existingToken = await ResetToken.findOne({ reset_token: token })
     if (!existingAdmin || !existingToken) return res.json(Boom.unauthorized())
-    if (existingAdmin.email !== existingToken.email) return res.json(Boom.unauthorized())
+    if (existingAdmin.email !== existingToken.email)
+      return res.json(Boom.unauthorized())
     const isOldPassword = await bcrypt.compare(password, existingAdmin.password)
     if (isOldPassword) return res.json(Boom.conflict('Cannot use old password'))
     const hashedPassword = await bcrypt.hash(password, 12)
@@ -262,17 +259,18 @@ export const resetPassword = async (req, res) => {
 
 export const verifyEmail = async (req, res) => {
   const { token } = req.params
-  if (!token) return res.status(400).json({ message: 'Not a valid token' })
   const { id } = decodeAccessToken(token)
   try {
     const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin)
-      return res.status(404).json({ message: 'Admin doesn\'t exist' })
+      return res.json(Boom.notFound('Admin doesn\'t exist'))
+    if (existingAdmin.verified_email)
+      return res.json(Boom.badRequest('Email already verified'))
     existingAdmin.verified_email = true
     await existingAdmin.save()
     res.status(200).json({ message: 'Admin Email Successfully Verified' })
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.json(Boom.badRequest(error.message))
   }
 }
 
@@ -286,5 +284,26 @@ export const deleteAdmin = async (req, res) => {
     res.status(200).json({ message: 'Admin Deleted Successfully' })
   } catch (error) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    const existingAdmin = await AdminModal.findById(req.userID)
+    if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
+    if (existingAdmin.verified_email) throw new Error('Email already verified')
+    const verifyToken = generateAccessToken(
+      {
+        id: existingAdmin._id,
+      },
+      '30m'
+    )
+    handleEmailVerification(
+      existingAdmin.email,
+      `http://localhost:3000/verify/${verifyToken}`
+    )
+    res.status(200).json({ message: 'Email Sent' })
+  } catch (error) {
+    res.json(Boom.badRequest(error.message))
   }
 }

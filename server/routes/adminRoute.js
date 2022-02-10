@@ -11,6 +11,7 @@ import {
   deleteAdmin,
   resetPassword,
   getUsersByToken,
+  resendVerificationEmail,
 } from '../controllers/adminController.js'
 import {
   LoginSchema,
@@ -76,5 +77,6 @@ router.delete(
   validateSchema(DeleteSchema, 'params'),
   deleteAdmin
 )
+router.get('/resendVerificationEmail', authJWT, resendVerificationEmail)
 
 export default router
