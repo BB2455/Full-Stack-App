@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Container from 'react-bootstrap/Container'
 import { NavBar } from './components'
+import { useDispatch } from 'react-redux'
+import { getRefreshToken } from './actions/auth'
 
 import {
   Home,
@@ -18,6 +20,12 @@ import {
 } from './routes'
 
 const App = () => {
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(getRefreshToken())
+  }, [dispatch])
+
   return (
     <BrowserRouter>
       <NavBar />

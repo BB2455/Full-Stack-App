@@ -7,10 +7,10 @@ import Spinner from 'react-bootstrap/Spinner'
 import { getUsersByToken } from '../api'
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
+import { getActiveProfile } from '../utils/getActiveProfile'
 
 const ResetPassword = () => {
   const navigate = useNavigate()
-  const profile = localStorage.getItem('profile')
   const [selectedUser, setSelectedUser] = useState('')
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -34,12 +34,12 @@ const ResetPassword = () => {
   }
 
   useEffect(() => {
-    if (profile) {
+    if (getActiveProfile()) {
       navigate('/', { replace: true })
       return
     }
     if (users.length > 0) setIsLoading(false)
-  }, [navigate, profile, users])
+  }, [navigate, users])
 
   const fetchUsers = async (token) => {
     try {

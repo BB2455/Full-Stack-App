@@ -6,14 +6,12 @@ import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { logout, getRefreshToken } from '../actions/auth'
-import decode from 'jwt-decode'
 import { PersonCircle } from 'react-bootstrap-icons'
+import { getActiveProfile } from '../utils/getActiveProfile'
 import { getDecodedToken } from '../utils/getDecodedToken'
 
 const NavBar = () => {
-  const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem('profile'))
-  )
+  const [currentUser, setCurrentUser] = useState(getActiveProfile())
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
@@ -26,17 +24,16 @@ const NavBar = () => {
   }
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem('profile'))?.accessToken
+    const profile = getActiveProfile()
 
-    if (token) {
-      const decodedToken = decode(token)
+    if (profile?.accessToken) {
+      const decodedToken = getDecodedToken(profile.accessToken)
       if (decodedToken.exp * 1000 - 60000 < new Date().getTime()) {
         dispatch(getRefreshToken())
       }
     }
-    setCurrentUser(JSON.parse(localStorage.getItem('profile')))
+    setCurrentUser(profile)
   }, [location, dispatch])
-
   return (
     <Navbar bg="light" variant="light" expand="sm">
       <Container>

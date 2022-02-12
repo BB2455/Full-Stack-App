@@ -6,10 +6,11 @@ import Spinner from 'react-bootstrap/Spinner'
 import { Link } from 'react-router-dom'
 import { verifyEmail } from '../api'
 import { getDecodedToken } from '../utils/getDecodedToken'
+import { getActiveProfile } from '../utils/getActiveProfile'
 
 const Verify = () => {
   const [message, setMessage] = useState('LOADING')
-  const user = localStorage.getItem('profile')
+  const user = getActiveProfile()
   const { token } = useParams()
 
   const VerifyEmail = async () => {

@@ -6,15 +6,15 @@ import SessionLogoutModal from '../components/Settings/SessionLogoutModal'
 import DeleteAccountModal from '../components/Settings/DeleteAccountModal'
 import ChangePasswordModal from '../components/Settings/ChangePasswordModal'
 import VerifyEmail from '../components/Settings/VerifyEmail'
+import { getActiveProfile } from '../utils/getActiveProfile'
 import { getDecodedToken } from '../utils/getDecodedToken'
 
 const Settings = () => {
   const navigate = useNavigate()
-  const profile = localStorage.getItem('profile')
   useEffect(() => {
-    if (!profile) navigate('/login', { replace: true })
-  }, [navigate, profile])
-  const user = getDecodedToken(JSON.parse(profile)?.accessToken)
+    if (!getActiveProfile()) navigate('/login', { replace: true })
+  }, [navigate])
+  const user = getDecodedToken(getActiveProfile()?.accessToken)
   return (
     <div>
       <Row className="justify-content-center">

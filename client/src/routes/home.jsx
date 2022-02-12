@@ -1,24 +1,25 @@
-import React, { useEffect } from "react";
-import UsersContainer from "../components/User/UsersContainer";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useSearchParams, Link } from "react-router-dom";
-import { getUsers } from "../actions/users";
-import Spinner from "react-bootstrap/Spinner";
+import React, { useEffect } from 'react'
+import UsersContainer from '../components/User/UsersContainer'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation, useSearchParams, Link } from 'react-router-dom'
+import { getUsers } from '../actions/users'
+import Spinner from 'react-bootstrap/Spinner'
+import { getActiveProfile } from '../utils/getActiveProfile'
 
 const Home = () => {
-  const { users, error, isLoading } = useSelector((state) => state.users);
-  const [searchParams] = useSearchParams();
-  const dispatch = useDispatch();
-  const location = useLocation();
+  const { users, error, isLoading } = useSelector((state) => state.users)
+  const [searchParams] = useSearchParams()
+  const dispatch = useDispatch()
+  const location = useLocation()
 
-  const profile = localStorage.getItem("profile");
+  const profile = getActiveProfile()
 
-  const page = searchParams.get("page") || 1;
+  const page = searchParams.get('page') || 1
 
   useEffect(() => {
-    dispatch(getUsers(page));
+    dispatch(getUsers(page))
     //eslint-disable-next-line
-  }, [location]);
+  }, [location])
 
   return (
     <>
@@ -45,7 +46,7 @@ const Home = () => {
         </>
       )}
     </>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

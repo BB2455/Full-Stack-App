@@ -1,9 +1,10 @@
-import React from "react";
-import Button from "react-bootstrap/Button";
-import ListGroup from "react-bootstrap/ListGroup";
+import React from 'react'
+import Button from 'react-bootstrap/Button'
+import ListGroup from 'react-bootstrap/ListGroup'
+import { getActiveProfile } from '../../utils/getActiveProfile'
 
 const UserInfo = ({ userData, editUser }) => {
-  const profile = localStorage.getItem("profile");
+  const profile = getActiveProfile()
   return (
     <div>
       <ListGroup variant="flush">
@@ -34,7 +35,7 @@ const UserInfo = ({ userData, editUser }) => {
         </Button>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default UserInfo;
+export default UserInfo

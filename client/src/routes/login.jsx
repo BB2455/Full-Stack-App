@@ -3,13 +3,13 @@ import LoginForm from '../components/Login/LoginForm'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import { useNavigate, Link } from 'react-router-dom'
+import { getActiveProfile } from '../utils/getActiveProfile'
 
 const Login = () => {
   const navigate = useNavigate()
-  const profile = localStorage.getItem('profile')
   useEffect(() => {
-    if (profile) navigate('/', { replace: true })
-  }, [navigate, profile])
+    if (getActiveProfile()) navigate('/', { replace: true })
+  }, [navigate])
   return (
     <div>
       <Row className="justify-content-center">
