@@ -66,17 +66,18 @@ export const logoutAllSessions = () => async (dispatch) => {
     if (data.isBoom) throw new Error(data.output.statusCode)
     dispatch({ type: LOGOUT })
   } catch (error) {
-    console.log(error.message)
+    console.error(error.message)
   }
 }
 
-export const deleteAccount = (userId) => async (dispatch) => {
+export const deleteAccount = (formData, errorHandler, navigate) => async (dispatch) => {
   try {
-    const { data } = await api.deleteAccount(userId)
+    const { data } = await api.deleteAccount(formData)
     if (data.isBoom) throw new Error(data.output.statusCode)
     dispatch({ type: LOGOUT })
+    navigate('/')
   } catch (error) {
-    console.log(error.message)
+    errorHandler(error.message)
   }
 }
 
@@ -88,7 +89,6 @@ export const getRefreshToken = () => async (dispatch) => {
     }
     dispatch({ type: AUTH, data })
   } catch (error) {
-    console.log(error.message)
     dispatch({type: LOGOUT})
   }
 }

@@ -4,7 +4,8 @@ import Button from 'react-bootstrap/Button'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { deleteAccount } from '../../actions/auth'
-import decode from 'jwt-decode'
+import Form from 'react-bootstrap/Form'
+import FloatingLabel from 'react-bootstrap/FloatingLabel'
 
 const DeleteAccountModal = () => {
   const [show, setShow] = useState(false)
@@ -13,12 +14,28 @@ const DeleteAccountModal = () => {
   const handleShow = () => setShow(true)
   const handleClose = () => setShow(false)
 
-  const onDeleteAccount = async () => {
-    const userId = decode(
-      JSON.parse(localStorage.getItem('profile'))?.accessToken
-    )?.id
-    await dispatch(deleteAccount(userId))
-    navigate('/')
+  const [formData, setForm] = useState({ password: '' })
+  const [error, setError] = useState('')
+
+  const handleChange = (e) => {
+    setForm({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const errorHandler = (errorMessage) => {
+    const errorCode = errorMessage.match(/\d+/)
+    switch (errorCode[0]) {
+      case '401':
+        setError('Incorrect password, please try again.')
+        return
+      default:
+        setError('Something went wrong, please try again later.')
+        return
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    await dispatch(deleteAccount(formData, errorHandler, navigate))
   }
 
   return (
@@ -47,12 +64,32 @@ const DeleteAccountModal = () => {
             This will permanently delete all data associated with this account.
             This action cannot be reversed.
           </p>
+          <p>Please type in your password to delete your account.</p>
+          <Form onSubmit={handleSubmit} id="passwordForm">
+            <Form.Group controlId="formPassword">
+              <FloatingLabel controlId="floatingPassword" label="Password">
+                <Form.Control
+                  placeholder="Password"
+                  type="password"
+                  name="password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </FloatingLabel>
+              {error && (
+                <Form.Text id="loginError" className="text-danger">
+                  {error}
+                </Form.Text>
+              )}
+            </Form.Group>
+          </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={onDeleteAccount}>
+          <Button variant="danger" type="submit" form="passwordForm">
             DELETE ACCOUNT
           </Button>
         </Modal.Footer>

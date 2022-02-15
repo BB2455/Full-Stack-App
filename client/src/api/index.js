@@ -53,7 +53,8 @@ export const logout = () => API.delete(`/admin/logout`)
 export const changePassword = (formData) =>
   API.patch(`/admin/changePassword`, formData)
 export const logoutAllSessions = () => API.delete(`/admin/logoutAllSessions`)
-export const deleteAccount = (userId) => API.delete(`/admin/id/${userId}`)
+export const deleteAccount = (formData) => API.patch(`/admin/deleteAccount`, formData)
 export const refreshToken = () => API.get(`/admin/refreshToken`)
 export const verifyEmail = (token) => API.patch(`admin/verifyEmail/${token}`)
-export const resendVerificationEmail = () => API.get(`admin/resendVerificationEmail`)
+export const resendVerificationEmail = () =>
+  API.get(`admin/resendVerificationEmail`)
