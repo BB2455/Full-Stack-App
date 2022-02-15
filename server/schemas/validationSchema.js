@@ -8,7 +8,7 @@ export const RegisterSchema = Joi.object({
 })
 
 export const DeleteSchema = Joi.object({
-  id: Joi.string(),
+  password: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
 })
 
 export const LoginSchema = Joi.object({

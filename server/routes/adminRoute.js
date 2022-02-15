@@ -71,10 +71,16 @@ router.put(
   validateSchema(VerifyEmailSchema, 'params'),
   verifyEmail
 )
-router.delete(
-  '/id/:id',
+router.put(
+  '/deleteAccount',
   authJWT,
-  validateSchema(DeleteSchema, 'params'),
+  validateSchema(DeleteSchema),
+  deleteAdmin
+)
+router.patch(
+  '/deleteAccount',
+  authJWT,
+  validateSchema(DeleteSchema),
   deleteAdmin
 )
 router.get('/resendVerificationEmail', authJWT, resendVerificationEmail)

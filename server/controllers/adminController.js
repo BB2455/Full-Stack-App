@@ -276,9 +276,17 @@ export const verifyEmail = async (req, res) => {
 
 export const deleteAdmin = async (req, res) => {
   try {
-    const existingAdmin = await AdminModal.findByIdAndDelete(req.params.id)
+    const existingAdmin = await AdminModal.findById(req.userID)
     if (!existingAdmin)
       return res.status(404).json({ message: 'Admin doesn\'t exist' })
+    const isPasswordCorrect = await bcrypt.compare(
+      req.body.password,
+      existingAdmin.password
+    )
+    // Check if Password is correct
+    if (!isPasswordCorrect)
+      return res.json(Boom.unauthorized('Invalid Password'))
+    existingAdmin.delete()
     // Logout Token
     res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
     res.status(200).json({ message: 'Admin Deleted Successfully' })
