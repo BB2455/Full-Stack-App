@@ -38,9 +38,13 @@ const Home = () => {
       ) : (
         <>
           <h2>No Users Found</h2>
-          {profile && (
-            <Link to="/create" className="btn btn-primary">
+          {profile ? (
+            <Link to="/create" className="btn btn-warning mt-2">
               Create New User
+            </Link>
+          ) : (
+            <Link to="/register" className="btn btn-secondary mt-2">
+              Register To Create New Users
             </Link>
           )}
         </>
