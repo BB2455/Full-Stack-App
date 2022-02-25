@@ -10,7 +10,6 @@ import {
   handleForgotPasswordEmail,
 } from '../utils/emailHandler.js'
 import generateAccessToken from '../utils/generateAccessToken.js'
-import generateTokens from '../utils/generateTokens.js'
 
 export const login = async (req, res) => {
   const {
@@ -23,20 +22,12 @@ export const login = async (req, res) => {
     })
     // Check if admin exists
     if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingAdmin.password
-    )
+    const isPasswordCorrect = await existingAdmin.verifyPassword(password)
     // Check if Password is correct
-    if (!isPasswordCorrect)
-      return res.json(Boom.unauthorized('Invalid Password'))
+    if (!isPasswordCorrect) throw new Error('Invalid Password')
     // Get tokens
-    const {
-      accessToken,
-      refreshToken
-    } = generateTokens(existingAdmin)
-    existingAdmin.active_tokens.push(refreshToken)
-    await existingAdmin.save()
+    const refreshToken = await existingAdmin.issueRefreshToken()
+    const accessToken = existingAdmin.issueAccessToken()
     // One Week Time
     const oneWeek = 7 * 24 * 3600 * 1000
     res.cookie('refresh_token', refreshToken, {
@@ -45,7 +36,7 @@ export const login = async (req, res) => {
     })
     res.status(200).json({ accessToken })
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.json(Boom.badData(error.message))
   }
 }
 
@@ -66,12 +57,9 @@ export const register = async (req, res) => {
       password: hashedPassword,
       username,
     })
-    const {
-      accessToken,
-      refreshToken
-    } = generateTokens(newAdmin)
-    newAdmin.active_tokens.push(refreshToken)
     await newAdmin.save()
+    const refreshToken = await newAdmin.issueRefreshToken()
+    const accessToken = newAdmin.issueAccessToken()
     // Send Verification Email
     const verifyToken = generateAccessToken(
       {
@@ -107,9 +95,7 @@ export const logout = async (req, res) => {
     }
 
     // Remove RefreshToken from active_tokens
-    const tokenIndex = existingAdmin.active_tokens.indexOf(refreshToken)
-    existingAdmin.active_tokens.splice(tokenIndex, 1)
-    await existingAdmin.save()
+    existingAdmin.logout(refreshToken)
     // Clear cookies, send expired token
     res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
     res.status(200).json({ message: 'Logout Successful' })
@@ -141,10 +127,7 @@ export const changePassword = async (req, res) => {
     // Get Existing Admin
     const existingAdmin = await AdminModal.findById(req.userID)
     // Check If Correct Password
-    const isPasswordCorrect = await bcrypt.compare(
-      currentPassword,
-      existingAdmin.password
-    )
+    const isPasswordCorrect = await existingAdmin.verifyPassword(currentPassword)
     if (!isPasswordCorrect)
       return res.json(Boom.badRequest('Invalid credentials'))
     // Set New Password
@@ -167,12 +150,11 @@ export const refresh_token = async (req, res) => {
     if (expired) throw new Error('Invalid Or Expired Token')
     const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
-    const active_token = existingAdmin.active_tokens.find(
-      (existingtoken) => existingtoken === refreshToken
-    )
-    if (!active_token) throw new Error('Invalid Or Expired Token')
-    const { accessToken } = generateTokens(existingAdmin)
 
+    const verifyToken = await existingAdmin.verifyRefreshToken(refreshToken)
+    if (!verifyToken) throw new Error('Invalid Or Expired Token')
+
+    const accessToken = existingAdmin.issueAccessToken()
     res.status(200).json({ accessToken })
   } catch (error) {
     res.json(Boom.badRequest(error.message))
