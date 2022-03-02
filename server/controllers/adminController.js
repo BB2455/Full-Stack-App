@@ -1,14 +1,12 @@
 import crypto from 'crypto'
 import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
+import { handleForgotPasswordEmail } from '../EmailTemplates/ForgotPassword.js'
+import { handleEmailVerification } from '../EmailTemplates/VerifyEmail.js'
 import AdminModal from '../models/admin.js'
 import ResetToken from '../models/resetToken.js'
 import decodeAccessToken from '../utils/decodeAccessToken.js'
 import decodeRefreshToken from '../utils/decodeRefreshToken.js'
-import {
-  handleEmailVerification,
-  handleForgotPasswordEmail,
-} from '../utils/emailHandler.js'
 import generateAccessToken from '../utils/generateAccessToken.js'
 
 export const login = async (req, res) => {
