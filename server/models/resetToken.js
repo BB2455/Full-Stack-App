@@ -14,7 +14,8 @@ const resetTokenSchema = mongoose.Schema({
   },
   reset_token: {
     required: true,
-    type: String
+    type: String,
+    unique: true,
   },
 })
 

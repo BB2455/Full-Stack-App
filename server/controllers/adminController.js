@@ -1,4 +1,3 @@
-import crypto from 'crypto'
 import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import { handleForgotPasswordEmail } from '../EmailTemplates/ForgotPassword.js'
@@ -8,6 +7,7 @@ import ResetToken from '../models/resetToken.js'
 import decodeAccessToken from '../utils/decodeAccessToken.js'
 import decodeRefreshToken from '../utils/decodeRefreshToken.js'
 import generateAccessToken from '../utils/generateAccessToken.js'
+import generateResetToken from '../utils/generateResetToken.js'
 
 export const login = async (req, res) => {
   const {
@@ -199,7 +199,7 @@ export const forgotPassword = async (req, res) => {
     if (!resetToken) {
       resetToken = await new ResetToken({
         email,
-        reset_token: crypto.randomBytes(32).toString('hex'),
+        reset_token: await generateResetToken(),
       }).save()
     }
 
