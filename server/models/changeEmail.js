@@ -63,26 +63,20 @@ changeEmailSchema.methods.checkVerification = async function () {
   }
 }
 
-changeEmailSchema.methods.verifyNewEmail = async function (token) {
-  if (this.verifyNewEmailToken === token) {
-    this.verifiedNewEmail = true
-    if (await this.checkVerification()) {
-      return
-    }
-
-    await this.save()
-  }
+changeEmailSchema.methods.verifyNewEmail = async function () {
+  this.verifiedNewEmail = true
+  if (await this.checkVerification()) return
+  await this.save()
 }
 
-changeEmailSchema.methods.verifyCurrentEmail = async function (token) {
-  if (this.verifyCurrentEmailToken === token) {
-    this.verifiedCurrentEmail = true
-    if (await this.checkVerification()) {
-      return
-    }
+changeEmailSchema.methods.verifyCurrentEmail = async function () {
+  this.verifiedCurrentEmail = true
+  if (await this.checkVerification()) return
+  await this.save()
+}
 
-    await this.save()
-  }
+changeEmailSchema.methods.cancelRequest = async function () {
+  await this.delete()
 }
 
 changeEmailSchema.methods.completeRequest = async function () {
