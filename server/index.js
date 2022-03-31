@@ -1,5 +1,6 @@
+/* eslint-disable unicorn/import-index */
 import dotenv from 'dotenv'
-// eslint-disable-next-line unicorn/import-index
+import { cronJob } from './cron/index.js'
 import database from './database/index.js'
 import app from './server.js'
 
@@ -19,3 +20,5 @@ try {
 } catch (error) {
   console.error(error.message)
 }
+
+cronJob.start()

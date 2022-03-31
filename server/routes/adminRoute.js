@@ -12,6 +12,7 @@ import {
   resetPassword,
   getUsersByToken,
   resendVerificationEmail,
+  changeEmail
 } from '../controllers/adminController.js'
 import {
   LoginSchema,
@@ -22,6 +23,7 @@ import {
   ChangePasswordSchema,
   ResetPasswordSchema,
   GetUsersByTokenSchema,
+  ChangeEmailSchema,
 } from '../schemas/validationSchema.js'
 import authJWT from '../utils/authJWT.js'
 import validateSchema from '../utils/validateSchema.js'
@@ -84,5 +86,6 @@ router.patch(
   deleteAdmin
 )
 router.get('/resendVerificationEmail', authJWT, resendVerificationEmail)
+router.post('/changeEmail', authJWT, validateSchema(ChangeEmailSchema), changeEmail)
 
 export default router

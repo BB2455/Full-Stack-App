@@ -38,3 +38,8 @@ export const ResetPasswordSchema = Joi.object({
 export const GetUsersByTokenSchema = Joi.object({
   token: Joi.string().required(),
 })
+
+export const ChangeEmailSchema = Joi.object({
+  newEmail: Joi.string().email().lowercase().trim().required(),
+  password: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
+})

@@ -1,4 +1,3 @@
-/* eslint-disable @babel/no-invalid-this */
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
@@ -14,24 +13,24 @@ const adminSchema = mongoose.Schema(
   { timestamps: true }
 )
 
-adminSchema.method('verifyPassword', async function (password) {
+adminSchema.methods.verifyPassword = async function (password) {
   return await bcrypt.compare(password, this.password)
-})
+}
 
-adminSchema.method('verifyRefreshToken', async function (refreshToken) {
+adminSchema.methods.verifyRefreshToken = async function (refreshToken) {
   const refreshTokens = await refreshTokenModel.find({ userId: this._id })
   return await refreshTokens.find(async (token) => {
     if (await bcrypt.compare(refreshToken, token.refresh_token)) return true
     return false
   })
-})
+}
 
-adminSchema.method('logout', async function (refreshToken) {
+adminSchema.methods.logout = async function (refreshToken) {
   const token = await this.verifyRefreshToken(refreshToken)
   if (token) await token.delete()
-})
+}
 
-adminSchema.method('issueAccessToken', function () {
+adminSchema.methods.issueAccessToken = function () {
   const user = {
     id: this._id,
     username: this.username,
@@ -42,9 +41,9 @@ adminSchema.method('issueAccessToken', function () {
     issuer: 'fullStackAppServer',
     subject: this.username,
   })
-})
+}
 
-adminSchema.method('issueRefreshToken', async function () {
+adminSchema.methods.issueRefreshToken = async function () {
   const token = jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: '7d',
     issuer: 'fullStackAppServer',
@@ -58,7 +57,12 @@ adminSchema.method('issueRefreshToken', async function () {
   await newRefreshToken.save()
 
   return token
-})
+}
+
+adminSchema.methods.changeEmail = async function (newEmail) {
+  this.email = newEmail
+  await this.save()
+}
 
 const Admin = mongoose.model('Admin', adminSchema)
 

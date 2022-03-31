@@ -4,6 +4,7 @@ import { handleForgotPasswordEmail } from '../EmailTemplates/ForgotPassword.js'
 import { handleEmailVerification } from '../EmailTemplates/VerifyEmail.js'
 import AdminModal from '../models/admin.js'
 import ResetToken from '../models/resetToken.js'
+import { createChangeEmailRequest } from '../utils/createChangeEmailRequest.js'
 import decodeAccessToken from '../utils/decodeAccessToken.js'
 import decodeRefreshToken from '../utils/decodeRefreshToken.js'
 import generateAccessToken from '../utils/generateAccessToken.js'
@@ -291,6 +292,18 @@ export const resendVerificationEmail = async (req, res) => {
       `http://localhost:3000/verify/${verifyToken}`
     )
     res.status(200).json({ message: 'Email Sent' })
+  } catch (error) {
+    res.json(Boom.badRequest(error.message))
+  }
+}
+
+export const changeEmail = async (req, res) => {
+  try {
+    const existingAdmin = await AdminModal.findById(req.userID)
+    const verifiedPassword = await existingAdmin.verifyPassword(req.body.password)
+    if (!verifiedPassword) throw new Error('Invalid Password')
+    await createChangeEmailRequest(existingAdmin._id, existingAdmin.email, req.body.newEmail)
+    res.status(200).json({message: 'Change Email Request Successfully Sent'})
   } catch (error) {
     res.json(Boom.badRequest(error.message))
   }
