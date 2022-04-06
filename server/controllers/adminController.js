@@ -69,7 +69,7 @@ export const register = async (req, res) => {
     )
     handleEmailVerification(
       email,
-      `http://localhost:3000/verify/${verifyToken}`
+      verifyToken
     )
     // One Week
     const oneWeek = 7 * 24 * 3600 * 1000
@@ -206,7 +206,7 @@ export const forgotPassword = async (req, res) => {
 
     handleForgotPasswordEmail(
       email,
-      `http://localhost:3000/reset-password?token=${resetToken.reset_token}`
+      resetToken.reset_token
     )
     res.status(200).json({ message: 'Sent Email' })
   } catch (error) {
@@ -289,7 +289,7 @@ export const resendVerificationEmail = async (req, res) => {
     )
     handleEmailVerification(
       existingAdmin.email,
-      `http://localhost:3000/verify/${verifyToken}`
+      verifyToken
     )
     res.status(200).json({ message: 'Email Sent' })
   } catch (error) {
