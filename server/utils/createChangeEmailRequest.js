@@ -6,5 +6,4 @@ export const createChangeEmailRequest = async (userId, userEmail, newEmail) => {
     userId,
   })
   await change.createRequest(userEmail)
-  await change.save()
 }

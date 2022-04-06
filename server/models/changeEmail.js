@@ -1,9 +1,13 @@
-/* eslint-disable @babel/no-invalid-this */
 import crypto from 'crypto'
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
+import { handleChangeEmailVerification } from '../EmailTemplates/VerifyChangeEmail'
+import { handleNewEmailVerification } from '../EmailTemplates/VerifyNewEmail'
 import adminModel from './admin'
-// import { handleChangeEmailVerification } from '../EmailTemplates/VerifyChangeEmail'
-// import { handleNewEmailVerification } from '../EmailTemplates/VerifyNewEmail'
+
+dotenv.config()
+const TOKEN_SECRET = process.env.CHANGE_EMAIL_TOKEN_SECRET
 
 const changeEmailSchema = mongoose.Schema({
   cancelChangeToken: {
@@ -46,13 +50,37 @@ changeEmailSchema.methods.changeUserEmail = async function () {
   await admin.changeEmail(this.newEmail)
 }
 
+changeEmailSchema.methods.prepareTokens = function () {
+  const cancelToken = jwt.sign(
+    { requestId: this._id, token: this.cancelChangeToken },
+    TOKEN_SECRET,
+    { expiresIn: '30d', subject: 'cancel' }
+  )
+  const currentVerifyToken = jwt.sign(
+    { requestId: this._id, token: this.verifyCurrentEmailToken },
+    TOKEN_SECRET,
+    { expiresIn: '30d', subject: 'verifyCurrent' }
+  )
+  const newVerifyToken = jwt.sign(
+    { requestId: this._id, token: this.verifyNewEmailToken },
+    TOKEN_SECRET,
+    { expiresIn: '30d', subject: 'verifyNew' }
+  )
+
+  return {
+    current: { cancel: cancelToken, verify: currentVerifyToken },
+    new: { verify: newVerifyToken },
+  }
+}
+
 changeEmailSchema.methods.createRequest = async function (currentEmail) {
   this.cancelChangeToken = crypto.randomBytes(32).toString('hex')
   this.verifyCurrentEmailToken = crypto.randomBytes(32).toString('hex')
   this.verifyNewEmailToken = crypto.randomBytes(32).toString('hex')
-  // const tokens = {cancel: this.cancelChangeToken, verify: this.verifyCurrentEmailToken}
-  // await handleNewEmailVerification(this.newEmail, {verify: verifyNewEmailToken})
-  // await handleChangeEmailVerification(currentEmail, tokens)
+  const tokens = this.prepareTokens()
+  await handleNewEmailVerification(this.newEmail, tokens.new)
+  await handleChangeEmailVerification(currentEmail, tokens.current)
+  await this.save()
 }
 
 changeEmailSchema.methods.checkVerification = async function () {
