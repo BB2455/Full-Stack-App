@@ -12,7 +12,8 @@ import {
   resetPassword,
   getUsersByToken,
   resendVerificationEmail,
-  changeEmail
+  changeEmail,
+  verifyChangeEmailToken,
 } from '../controllers/adminController.js'
 import {
   LoginSchema,
@@ -24,7 +25,9 @@ import {
   ResetPasswordSchema,
   GetUsersByTokenSchema,
   ChangeEmailSchema,
+  VerifyChangeEmailSchema,
 } from '../schemas/validationSchema.js'
+import authChangeEmailJWT from '../utils/authChangeEmailJWT'
 import authJWT from '../utils/authJWT.js'
 import validateSchema from '../utils/validateSchema.js'
 
@@ -73,12 +76,7 @@ router.put(
   validateSchema(VerifyEmailSchema, 'params'),
   verifyEmail
 )
-router.put(
-  '/deleteAccount',
-  authJWT,
-  validateSchema(DeleteSchema),
-  deleteAdmin
-)
+router.put('/deleteAccount', authJWT, validateSchema(DeleteSchema), deleteAdmin)
 router.patch(
   '/deleteAccount',
   authJWT,
@@ -86,6 +84,17 @@ router.patch(
   deleteAdmin
 )
 router.get('/resendVerificationEmail', authJWT, resendVerificationEmail)
-router.post('/changeEmail', authJWT, validateSchema(ChangeEmailSchema), changeEmail)
+router.post(
+  '/changeEmail',
+  authJWT,
+  validateSchema(ChangeEmailSchema),
+  changeEmail
+)
+router.post(
+  '/verifyChangeEmail/:token',
+  validateSchema(VerifyChangeEmailSchema, 'params'),
+  authChangeEmailJWT,
+  verifyChangeEmailToken
+)
 
 export default router

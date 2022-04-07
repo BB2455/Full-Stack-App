@@ -83,8 +83,30 @@ changeEmailSchema.methods.createRequest = async function (currentEmail) {
   await this.save()
 }
 
+changeEmailSchema.methods.handleVerificationRequest = async function (type) {
+  switch (type) {
+  case 'verifyNew': {
+    await this.verifyNewEmail()
+    break
+  }
+
+  case 'verifyCurrent': {
+    await this.verifyCurrentEmail()
+    break
+  }
+
+  case 'cancel': {
+    await this.cancelRequest()
+    break
+  }
+
+  default:
+    throw new Error('Unknown Type Request')
+  }
+}
+
 changeEmailSchema.methods.checkVerification = async function () {
-  if (this.verifiedNewEmail && this.verifyCurrentEmail) {
+  if (this.verifiedNewEmail && this.verifiedCurrentEmail) {
     await this.changeUserEmail()
     await this.delete()
     return true

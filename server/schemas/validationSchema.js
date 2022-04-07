@@ -43,3 +43,7 @@ export const ChangeEmailSchema = Joi.object({
   newEmail: Joi.string().email().lowercase().trim().required(),
   password: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/u).required(),
 })
+
+export const VerifyChangeEmailSchema = Joi.object({
+  token: Joi.string().required()
+})

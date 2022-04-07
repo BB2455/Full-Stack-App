@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { handleForgotPasswordEmail } from '../EmailTemplates/ForgotPassword.js'
 import { handleEmailVerification } from '../EmailTemplates/VerifyEmail.js'
 import AdminModal from '../models/admin.js'
+import ChangeEmailModel from '../models/changeEmail.js'
 import ResetToken from '../models/resetToken.js'
 import { createChangeEmailRequest } from '../utils/createChangeEmailRequest.js'
 import decodeAccessToken from '../utils/decodeAccessToken.js'
@@ -304,6 +305,21 @@ export const changeEmail = async (req, res) => {
     if (!verifiedPassword) throw new Error('Invalid Password')
     await createChangeEmailRequest(existingAdmin._id, existingAdmin.email, req.body.newEmail)
     res.status(200).json({message: 'Change Email Request Successfully Sent'})
+  } catch (error) {
+    res.json(Boom.badRequest(error.message))
+  }
+}
+
+export const verifyChangeEmailToken = async (req, res) => {
+  try {
+    const request = await ChangeEmailModel.findOne({$or: [
+      {verifyCurrentEmailToken: req.token},
+      {verifyNewEmailToken: req.token},
+      {verifyNewEmailToken: req.token},
+    ], _id: req.requestId})
+    await request.handleVerificationRequest(req.type)
+
+    res.status(200).json({message: 'Success'})
   } catch (error) {
     res.json(Boom.badRequest(error.message))
   }
