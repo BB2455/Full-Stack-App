@@ -318,7 +318,7 @@ export const verifyChangeEmailToken = async (req, res) => {
     const request = await ChangeEmailModel.findOne({$or: [
       {verifyCurrentEmailToken: req.token},
       {verifyNewEmailToken: req.token},
-      {verifyNewEmailToken: req.token},
+      {cancelChangeToken: req.token},
     ], _id: req.requestId})
     await request.handleVerificationRequest(req.type)
 
