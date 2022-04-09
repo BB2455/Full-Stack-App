@@ -1,9 +1,10 @@
 import changeEmailModel from '../models/changeEmail'
 
-export const createChangeEmailRequest = async (userId, userEmail, newEmail) => {
+export const createChangeEmailRequest = async (user, newEmail) => {
+  if (user.email === newEmail.toLowerCase().trim()) throw new Error('New Email Can\'t Be Current Email')
   const change = new changeEmailModel({
     newEmail,
-    userId,
+    userId: user._id,
   })
-  await change.createRequest(userEmail)
+  await change.createRequest(user.email)
 }

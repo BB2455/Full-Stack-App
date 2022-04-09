@@ -306,7 +306,7 @@ export const changeEmail = async (req, res) => {
     const existingAdmin = await AdminModal.findById(req.userID)
     const verifiedPassword = await existingAdmin.verifyPassword(req.body.password)
     if (!verifiedPassword) throw new Error('Invalid Password')
-    await createChangeEmailRequest(existingAdmin._id, existingAdmin.email, req.body.newEmail)
+    await createChangeEmailRequest(existingAdmin, req.body.newEmail)
     res.status(200).json({message: 'Change Email Request Successfully Sent'})
   } catch (error) {
     res.json(Boom.badRequest(error.message))
