@@ -4,6 +4,11 @@ import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
 import { handleChangeEmailVerification } from '../EmailTemplates/VerifyChangeEmail'
 import { handleNewEmailVerification } from '../EmailTemplates/VerifyNewEmail'
+import {
+  CANCEL,
+  VERIFY_CURRENT,
+  VERIFY_NEW,
+} from '../constants/changeEmailRequestTypes'
 import adminModel from './admin'
 
 dotenv.config()
@@ -12,36 +17,36 @@ const TOKEN_SECRET = process.env.CHANGE_EMAIL_TOKEN_SECRET
 const changeEmailSchema = mongoose.Schema({
   cancelChangeToken: {
     required: true,
-    type: String,
+    type    : String,
   },
   createdAt: {
     default: Date.now,
-    type: Date,
+    type   : Date,
   },
   newEmail: {
     required: true,
-    type: String,
+    type    : String,
   },
   userId: {
-    ref: 'User',
+    ref     : 'User',
     required: true,
-    type: mongoose.Types.ObjectId,
+    type    : mongoose.Types.ObjectId,
   },
   verifiedCurrentEmail: {
     default: false,
-    type: Boolean,
+    type   : Boolean,
   },
   verifiedNewEmail: {
     default: false,
-    type: Boolean,
+    type   : Boolean,
   },
   verifyCurrentEmailToken: {
     required: true,
-    type: String,
+    type    : String,
   },
   verifyNewEmailToken: {
     required: true,
-    type: String,
+    type    : String,
   },
 })
 
@@ -54,30 +59,30 @@ changeEmailSchema.methods.prepareTokens = function () {
   const cancelToken = jwt.sign(
     { requestId: this._id, token: this.cancelChangeToken },
     TOKEN_SECRET,
-    { expiresIn: '30d', subject: 'cancel' }
+    { expiresIn: '30d', subject: CANCEL }
   )
   const currentVerifyToken = jwt.sign(
     { requestId: this._id, token: this.verifyCurrentEmailToken },
     TOKEN_SECRET,
-    { expiresIn: '30d', subject: 'verifyCurrent' }
+    { expiresIn: '30d', subject: VERIFY_CURRENT }
   )
   const newVerifyToken = jwt.sign(
     { requestId: this._id, token: this.verifyNewEmailToken },
     TOKEN_SECRET,
-    { expiresIn: '30d', subject: 'verifyNew' }
+    { expiresIn: '30d', subject: VERIFY_NEW }
   )
 
   return {
     current: { cancel: cancelToken, verify: currentVerifyToken },
-    new: { verify: newVerifyToken },
+    new    : { verify: newVerifyToken },
   }
 }
 
 changeEmailSchema.methods.createRequest = async function (currentEmail) {
-  this.cancelChangeToken = crypto.randomBytes(32).toString('hex')
+  this.cancelChangeToken       = crypto.randomBytes(32).toString('hex')
   this.verifyCurrentEmailToken = crypto.randomBytes(32).toString('hex')
-  this.verifyNewEmailToken = crypto.randomBytes(32).toString('hex')
-  const tokens = this.prepareTokens()
+  this.verifyNewEmailToken     = crypto.randomBytes(32).toString('hex')
+  const tokens                       = this.prepareTokens()
   await handleNewEmailVerification(this.newEmail, tokens.new)
   await handleChangeEmailVerification(currentEmail, tokens.current)
   await this.save()
@@ -85,17 +90,17 @@ changeEmailSchema.methods.createRequest = async function (currentEmail) {
 
 changeEmailSchema.methods.handleVerificationRequest = async function (type) {
   switch (type) {
-  case 'verifyNew': {
+  case VERIFY_NEW: {
     await this.verifyNewEmail()
     break
   }
 
-  case 'verifyCurrent': {
+  case VERIFY_CURRENT: {
     await this.verifyCurrentEmail()
     break
   }
 
-  case 'cancel': {
+  case CANCEL: {
     await this.cancelRequest()
     break
   }

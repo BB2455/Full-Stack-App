@@ -2,12 +2,15 @@ import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import { handleForgotPasswordEmail } from '../EmailTemplates/ForgotPassword.js'
 import { handleEmailVerification } from '../EmailTemplates/VerifyEmail.js'
+import {
+  ACCESS,
+  REFRESH
+} from '../constants/secretTypes.js'
 import AdminModal from '../models/admin.js'
 import ChangeEmailModel from '../models/changeEmail.js'
 import ResetToken from '../models/resetToken.js'
 import { createChangeEmailRequest } from '../utils/createChangeEmailRequest.js'
-import decodeAccessToken from '../utils/decodeAccessToken.js'
-import decodeRefreshToken from '../utils/decodeRefreshToken.js'
+import decodeToken from '../utils/decodeToken.js'
 import generateAccessToken from '../utils/generateAccessToken.js'
 import generateResetToken from '../utils/generateResetToken.js'
 
@@ -87,7 +90,7 @@ export const register = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies.refresh_token
-    const { id } = decodeRefreshToken(refreshToken)
+    const { id } = decodeToken(refreshToken, REFRESH)
     const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin) {
       res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
@@ -107,7 +110,7 @@ export const logout = async (req, res) => {
 export const logoutAllSessions = async (req, res) => {
   try {
     const refreshToken = req.cookies.refresh_token
-    const { id } = decodeRefreshToken(refreshToken)
+    const { id } = decodeToken(refreshToken, REFRESH)
     const existingAdmin = await AdminModal.findById(id)
     existingAdmin.active_tokens = []
     existingAdmin.save()
@@ -146,7 +149,7 @@ export const refresh_token = async (req, res) => {
     const {
       expired,
       id
-    } = decodeRefreshToken(refreshToken)
+    } = decodeToken(refreshToken, REFRESH)
     if (expired) throw new Error('Invalid Or Expired Token')
     const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
@@ -241,7 +244,7 @@ export const resetPassword = async (req, res) => {
 
 export const verifyEmail = async (req, res) => {
   const { token } = req.params
-  const { id } = decodeAccessToken(token)
+  const { id } = decodeToken(token, ACCESS)
   try {
     const existingAdmin = await AdminModal.findById(id)
     if (!existingAdmin)

@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom'
-import decodeAccessToken from './decodeAccessToken.js'
+import { ACCESS } from '../constants/secretTypes.js'
+import decodeToken from './decodeToken.js'
 
 const authJWT = async (req, res, next) => {
   if (process.env.NODE_ENV === 'TEST') return next()
@@ -7,7 +8,7 @@ const authJWT = async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1]
 
     if (token) {
-      const decodedData = decodeAccessToken(token)
+      const decodedData = decodeToken(token, ACCESS)
       if (decodedData.expired) throw new Error('Invalid Or Expired Token')
       req.userID = decodedData?.id
     }
