@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
+import { handleEmailVerification } from '../EmailTemplates/VerifyEmail'
 import refreshTokenModel from './refreshToken'
 
 const adminSchema = mongoose.Schema(
@@ -23,6 +24,14 @@ adminSchema.methods.verifyRefreshToken = async function (refreshToken) {
     if (await bcrypt.compare(refreshToken, token.refresh_token)) return true
     return false
   })
+}
+
+adminSchema.methods.sendVerificationEmail = function () {
+  if (this.verified_email) throw new Error('Email already verified')
+  const token = jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: '30m',
+  })
+  handleEmailVerification(this.email, token)
 }
 
 adminSchema.methods.logout = async function (refreshToken) {

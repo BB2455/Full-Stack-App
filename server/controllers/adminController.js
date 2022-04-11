@@ -1,7 +1,6 @@
 import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import { handleForgotPasswordEmail } from '../EmailTemplates/ForgotPassword.js'
-import { handleEmailVerification } from '../EmailTemplates/VerifyEmail.js'
 import {
   ACCESS,
   REFRESH
@@ -11,7 +10,6 @@ import ChangeEmailModel from '../models/changeEmail.js'
 import ResetToken from '../models/resetToken.js'
 import { createChangeEmailRequest } from '../utils/createChangeEmailRequest.js'
 import decodeToken from '../utils/decodeToken.js'
-import generateAccessToken from '../utils/generateAccessToken.js'
 import generateResetToken from '../utils/generateResetToken.js'
 
 export const login = async (req, res) => {
@@ -63,18 +61,7 @@ export const register = async (req, res) => {
     await newAdmin.save()
     const refreshToken = await newAdmin.issueRefreshToken()
     const accessToken = newAdmin.issueAccessToken()
-    // Send Verification Email
-    const verifyToken = generateAccessToken(
-      {
-        id: newAdmin._id,
-        username,
-      },
-      '30m'
-    )
-    handleEmailVerification(
-      email,
-      verifyToken
-    )
+    newAdmin.sendVerificationEmail()
     // One Week
     const oneWeek = 7 * 24 * 3600 * 1000
     res.cookie('refresh_token', refreshToken, {
@@ -284,17 +271,7 @@ export const resendVerificationEmail = async (req, res) => {
   try {
     const existingAdmin = await AdminModal.findById(req.userID)
     if (!existingAdmin) return res.json(Boom.notFound('Admin doesn\'t exist'))
-    if (existingAdmin.verified_email) throw new Error('Email already verified')
-    const verifyToken = generateAccessToken(
-      {
-        id: existingAdmin._id,
-      },
-      '30m'
-    )
-    handleEmailVerification(
-      existingAdmin.email,
-      verifyToken
-    )
+    existingAdmin.sendVerificationEmail()
     res.status(200).json({ message: 'Email Sent' })
   } catch (error) {
     res.json(Boom.badRequest(error.message))
