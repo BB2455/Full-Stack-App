@@ -6,6 +6,7 @@ import SessionLogoutModal from '../components/Settings/SessionLogoutModal'
 import DeleteAccountModal from '../components/Settings/DeleteAccountModal'
 import ChangePasswordModal from '../components/Settings/ChangePasswordModal'
 import VerifyEmail from '../components/Settings/VerifyEmail'
+import ChangeEmailModal from '../components/Settings/ChangeEmailModal'
 import { getActiveProfile } from '../utils/getActiveProfile'
 import { getDecodedToken } from '../utils/getDecodedToken'
 
@@ -21,7 +22,11 @@ const Settings = () => {
         <Col lg={4} md={6} sm={7}>
           <h1 className="mb-5">Settings</h1>
           {user?.verified_email ? (
-            <>{/* Change Email Modal */}</>
+            <>
+              <h4>Change Email</h4>
+              <h6>Change your current email.</h6>
+              <ChangeEmailModal />
+            </>
           ) : (
             <VerifyEmail />
           )}

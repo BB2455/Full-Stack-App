@@ -58,3 +58,4 @@ export const refreshToken = () => API.get(`/admin/refreshToken`)
 export const verifyEmail = (token) => API.patch(`admin/verifyEmail/${token}`)
 export const resendVerificationEmail = () =>
   API.get(`admin/resendVerificationEmail`)
+export const changeEmailRequest = (formData) => API.post(`/admin/changeEmail`, formData)
