@@ -155,7 +155,7 @@ export const getUsersByToken = async (req, res) => {
   try {
     const resetToken = await ResetToken.findOne({ reset_token: token })
     if (!resetToken)
-      return res.json(Boom.unauthorized('Expired Or Invalid Token'))
+      return res.json(Boom.unauthorized('Invalid Or Expired Token'))
     const users = await AdminModal.find({
       $and: [
         { email: resetToken.email },
@@ -296,6 +296,7 @@ export const verifyChangeEmailToken = async (req, res) => {
       {verifyNewEmailToken: req.token},
       {cancelChangeToken: req.token},
     ], _id: req.requestId})
+    if (!request) throw new Error('Invalid Or Expired Token')
     await request.handleVerificationRequest(req.type)
 
     res.status(200).json({message: 'Success'})
