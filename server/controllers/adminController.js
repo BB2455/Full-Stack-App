@@ -7,6 +7,7 @@ import {
 } from '../constants/secretTypes.js'
 import AdminModal from '../models/admin.js'
 import ChangeEmailModel from '../models/changeEmail.js'
+import RefreshTokenModel from '../models/refreshToken.js'
 import ResetToken from '../models/resetToken.js'
 import { createChangeEmailRequest } from '../utils/createChangeEmailRequest.js'
 import decodeToken from '../utils/decodeToken.js'
@@ -98,9 +99,7 @@ export const logoutAllSessions = async (req, res) => {
   try {
     const refreshToken = req.cookies.refresh_token
     const { id } = decodeToken(refreshToken, REFRESH)
-    const existingAdmin = await AdminModal.findById(id)
-    existingAdmin.active_tokens = []
-    existingAdmin.save()
+    await RefreshTokenModel.deleteMany({userId: id})
     res.clearCookie('refresh_token', { httpOnly: true, maxAge: -1 })
     res.status(200).json({ message: 'Successfully Ended All Sessions' })
   } catch (error) {
