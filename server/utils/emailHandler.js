@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 })
 
 export const sendEmail = async (message) => {
-  const fullMessage = { from: `Node Mailer <${EMAIL}>`, ...message }
+  const fullMessage = { from: `Full Stack App <${EMAIL}>`, ...message }
   try {
     await transporter.sendMail(fullMessage)
   } catch (error) {

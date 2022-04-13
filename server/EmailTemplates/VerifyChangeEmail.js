@@ -11,7 +11,7 @@ export const handleChangeEmailVerification = async (email, tokens) => {
     <a href=${cancelURL} target="_blank">${cancelURL}</a>
     <p>Make sure you change your password as soon as possible.</p>
     `,
-    subject: 'Node Mailer Email Verification',
+    subject: 'Full Stack App Change Email Request',
     text: `Click here to verify your new email: \n 
     ${verifyURL} \n
     If you didn't make this change click here: \n
