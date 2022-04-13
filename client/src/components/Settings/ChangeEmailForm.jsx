@@ -7,10 +7,14 @@ const ChangeEmailForm = ({
   formData,
   handleChange,
   error,
-  loading
+  loading,
 }) => {
   return (
-    <Form onSubmit={handleSubmit} id="changeEmailForm" style={{contentVisibility: `${loading ? 'hidden' : 'visible'}`}}>
+    <Form
+      onSubmit={handleSubmit}
+      id="changeEmailForm"
+      style={{ contentVisibility: `${loading ? 'hidden' : 'visible'}` }}
+    >
       <Form.Group className="mb-3" controlId="formNewEmail">
         <FloatingLabel controlId="floatingNewEmail" label="New Email">
           <Form.Control
@@ -24,10 +28,7 @@ const ChangeEmailForm = ({
         </FloatingLabel>
       </Form.Group>
       <Form.Group controlId="formPassword">
-        <FloatingLabel
-          controlId="floatingPassword"
-          label="Password"
-        >
+        <FloatingLabel controlId="floatingPassword" label="Password">
           <Form.Control
             placeholder="Password"
             type="password"

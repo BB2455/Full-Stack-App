@@ -37,7 +37,7 @@ const ChangeEmailModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log(loading)
+    if (loading) return
     try {
       setLoading(true)
       const { data } = await changeEmailRequest(formData)
