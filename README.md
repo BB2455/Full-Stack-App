@@ -60,7 +60,3 @@ npm start
   - BcryptJS
   - Cors
   - JSONWebTokens
-
-## Continued Development
-
-Going forward I'll be adding tests to each component and backend test api endpoints.
