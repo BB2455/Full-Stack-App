@@ -3,7 +3,8 @@ import mongoose from 'mongoose'
 
 dotenv.config()
 
-const DB_URL = process.env.CONNECTION_URL
+const DB_URL =
+  process.env.DATABASE_URL || 'mongodb://localhost:27017/fullStackDB'
 
 const connect = async () => {
   return await mongoose
