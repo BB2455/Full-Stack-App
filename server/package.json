@@ -11,7 +11,8 @@
   "scripts": {
     "start": "node index.js",
     "dev"  : "nodemon --experimental-specifier-resolution=node index.js",
-    "test" : "mocha --timeout 60000 --recursive --exit"
+    "test" : "mocha --timeout 60000 --recursive --exit",
+    "seed" : "node database/seed.js"
   },
   "keywords"    : [],
   "author"      : "",
