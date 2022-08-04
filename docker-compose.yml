@@ -3,16 +3,15 @@ services:
   app:
     build: ./client/
     container_name: app
-    ports:
-      - '3000:3000'
     volumes:
-      - ./client/:/usr/src/app
+      - build-file:/usr/src/app/build
       - /usr/src/app/node_modules
     networks:
       - mern-app
   server:
     build: ./server/
     container_name: server
+    restart: unless-stopped
     ports:
       - '5000:5000'
     volumes:
@@ -27,12 +26,26 @@ services:
   mongo:
     image: mongo
     container_name: mongodb
+    restart: unless-stopped
     ports:
       - '27017:27017'
     networks:
       - mern-app
     volumes:
       - mongo-data:/data/db
+  web_server:
+    build: ./nginx/
+    container_name: web_server
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - build-file:/usr/share/nginx/html
+    networks:
+      - mern-app
+    depends_on:
+      - app
+      - server
 
 networks:
   mern-app:
@@ -40,4 +53,6 @@ networks:
 
 volumes:
   mongo-data:
+    driver: local
+  build-file:
     driver: local
