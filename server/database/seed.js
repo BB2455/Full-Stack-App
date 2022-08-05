@@ -3,7 +3,7 @@ import fs from 'fs'
 import dotenv from 'dotenv'
 import User from '../models/user.js'
 // eslint-disable-next-line unicorn/import-index
-import database from '.'
+import database from './index.js'
 
 dotenv.config()
 
