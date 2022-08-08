@@ -4,7 +4,7 @@ services:
     build: ./client/
     container_name: app
     volumes:
-      - build-file:/usr/src/app/build
+      - ./client/build:/usr/src/app/build
       - /usr/src/app/node_modules
     networks:
       - mern-app
@@ -33,19 +33,6 @@ services:
       - mern-app
     volumes:
       - mongo-data:/data/db
-  web_server:
-    build: ./nginx/
-    container_name: web_server
-    restart: unless-stopped
-    ports:
-      - '80:80'
-    volumes:
-      - build-file:/usr/share/nginx/html:ro
-    networks:
-      - mern-app
-    depends_on:
-      - app
-      - server
 
 networks:
   mern-app:
@@ -53,6 +40,4 @@ networks:
 
 volumes:
   mongo-data:
-    driver: local
-  build-file:
     driver: local
