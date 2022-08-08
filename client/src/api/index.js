@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 const API = axios.create({
-  baseURL: '/api',
+  baseURL:
+    process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/',
   withCredentials: true,
 })
 
@@ -61,4 +62,5 @@ export const resendVerificationEmail = () =>
   API.get(`/admin/resendVerificationEmail`)
 export const changeEmailRequest = (formData) =>
   API.post(`/admin/changeEmail`, formData)
-export const verifyChangeEmail = (token) => API.post(`/admin/verifyChangeEmail/${token}`)
+export const verifyChangeEmail = (token) =>
+  API.post(`/admin/verifyChangeEmail/${token}`)
