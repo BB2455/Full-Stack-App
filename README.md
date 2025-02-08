@@ -2,10 +2,6 @@
 
 First version of my first full stack application using the MERN stack (MongoDB, Express, React, NodeJS). Was originally for a practical assessment but has turned into a learning and growth opportunity.
 
-## Links
-
-Live Site: https://www.blairsfullstack.com
-
 ## Prerequisite
 
 ```
